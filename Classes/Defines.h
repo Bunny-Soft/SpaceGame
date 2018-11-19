@@ -1,0 +1,10 @@
+#pragma once
+
+#define MAX_ENEMIES 1000
+
+// Box2D related
+#define GL_TO_BOX2D_COORD 0.025f
+#define BOX2D_TO_GL_COORD 40
+#define DEGTORAD 0.0174532925199432957f
+#define RADTODEG 57.295779513082320876f
+
