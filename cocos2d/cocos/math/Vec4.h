@@ -1,7 +1,6 @@
 /**
  Copyright 2013 BlackBerry Inc.
- Copyright (c) 2014-2017 Chukong Technologies
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2014-2015 Chukong Technologies
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -344,7 +343,7 @@ public:
      * @param v The vector to add.
      * @return The vector sum.
      */
-    inline Vec4 operator+(const Vec4& v) const;
+    inline const Vec4 operator+(const Vec4& v) const;
 
     /**
      * Adds the given vector to this vector.
@@ -362,7 +361,7 @@ public:
      * @param v The vector to add.
      * @return The vector sum.
      */
-    inline Vec4 operator-(const Vec4& v) const;
+    inline const Vec4 operator-(const Vec4& v) const;
 
     /**
      * Subtracts the given vector from this vector.
@@ -379,7 +378,7 @@ public:
      * 
      * @return The negation of this vector.
      */
-    inline Vec4 operator-() const;
+    inline const Vec4 operator-() const;
 
     /**
      * Calculates the scalar product of this vector with the given value.
@@ -389,7 +388,7 @@ public:
      * @param s The value to scale by.
      * @return The scaled vector.
      */
-    inline Vec4 operator*(float s) const;
+    inline const Vec4 operator*(float s) const;
 
     /**
      * Scales this vector by the given value.
@@ -407,7 +406,7 @@ public:
      * @param s the constant to divide this vector with
      * @return a smaller vector
      */
-    inline Vec4 operator/(float s) const;
+    inline const Vec4 operator/(float s) const;
 
     /**
      * Determines if this vector is less than the given vector.
@@ -457,7 +456,7 @@ public:
  * @param v The vector to scale.
  * @return The scaled vector.
  */
-inline Vec4 operator*(float x, const Vec4& v);
+inline const Vec4 operator*(float x, const Vec4& v);
 
 NS_CC_MATH_END
 /**

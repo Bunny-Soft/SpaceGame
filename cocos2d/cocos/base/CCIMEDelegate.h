@@ -1,7 +1,6 @@
 /****************************************************************************
 Copyright (c) 2010 cocos2d-x.org
-Copyright (c) 2013-2016 Chukong Technologies Inc.
-Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+Copyright (C) 2013-2014 Chukong Technologies Inc.
 
 http://www.cocos2d-x.org
 
@@ -117,7 +116,7 @@ protected:
     * @js NA
     * @lua NA
     */
-    virtual void insertText(const char* /*text*/, size_t /*len*/) {}
+    virtual void insertText(const char * text, size_t len) {CC_UNUSED_PARAM(text);CC_UNUSED_PARAM(len);}
 
     /**
     @brief    Called by IMEDispatcher after the user clicks the backward key.
@@ -131,7 +130,7 @@ protected:
     * @js NA
     * @lua NA
     */
-    virtual void controlKey(EventKeyboard::KeyCode /*keyCode*/) {}
+    virtual void controlKey(EventKeyboard::KeyCode keyCode) {}
 
     /**
     @brief    Called by IMEDispatcher for text stored in delegate.
@@ -147,22 +146,22 @@ protected:
      * @js NA
      * @lua NA
      */
-    virtual void keyboardWillShow(IMEKeyboardNotificationInfo& /*info*/)   {}
+    virtual void keyboardWillShow(IMEKeyboardNotificationInfo& info)   {CC_UNUSED_PARAM(info);}
     /**
      * @js NA
      * @lua NA
      */
-    virtual void keyboardDidShow(IMEKeyboardNotificationInfo& /*info*/)    {}
+    virtual void keyboardDidShow(IMEKeyboardNotificationInfo& info)    {CC_UNUSED_PARAM(info);}
     /**
      * @js NA
      * @lua NA
      */
-    virtual void keyboardWillHide(IMEKeyboardNotificationInfo& /*info*/)   {}
+    virtual void keyboardWillHide(IMEKeyboardNotificationInfo& info)   {CC_UNUSED_PARAM(info);}
     /**
      * @js NA
      * @lua NA
      */
-    virtual void keyboardDidHide(IMEKeyboardNotificationInfo& /*info*/)    {}
+    virtual void keyboardDidHide(IMEKeyboardNotificationInfo& info)    {CC_UNUSED_PARAM(info);}
 
 protected:
     /**

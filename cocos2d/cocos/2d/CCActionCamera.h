@@ -3,7 +3,6 @@ Copyright (c) 2008-2010 Ricardo Quesada
 Copyright (c) 2010-2012 cocos2d-x.org
 Copyright (c) 2011      Zynga Inc.
 Copyright (c) 2013-2016 Chukong Technologies Inc.
-Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
  
 http://www.cocos2d-x.org
 
@@ -45,7 +44,7 @@ class Camera;
  *@brief Base class for Camera actions.
  *@ingroup Actions
  */
-class CC_DLL ActionCamera : public ActionInterval
+class CC_DLL ActionCamera : public ActionInterval //<NSCopying> 
 {
 public:
     /**
@@ -118,7 +117,7 @@ protected:
  * Orbits the camera around the center of the screen using spherical coordinates.
  * @ingroup Actions
  */
-class CC_DLL OrbitCamera : public ActionCamera
+class CC_DLL OrbitCamera : public ActionCamera //<NSCopying> 
 {
 public:
     /** Creates a OrbitCamera action with radius, delta-radius,  z, deltaZ, x, deltaX. 

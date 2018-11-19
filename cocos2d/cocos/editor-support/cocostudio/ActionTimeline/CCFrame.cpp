@@ -1,6 +1,5 @@
 /****************************************************************************
 Copyright (c) 2013 cocos2d-x.org
-Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
 http://www.cocos2d-x.org
 
@@ -115,7 +114,7 @@ VisibleFrame::VisibleFrame()
 {
 }
 
-void VisibleFrame::onEnter(Frame* /*nextFrame*/, int /*currentFrameIndex*/)
+void VisibleFrame::onEnter(Frame *nextFrame, int currentFrameIndex)
 {
     if (_node)
     {
@@ -150,8 +149,7 @@ TextureFrame* TextureFrame::create()
 }
 
 TextureFrame::TextureFrame()
-    : _sprite(nullptr)
-    , _textureName("")
+    : _textureName("")
 {
 }
 
@@ -162,7 +160,7 @@ void TextureFrame::setNode(Node* node)
     _sprite = dynamic_cast<Sprite*>(node);
 }
 
-void TextureFrame::onEnter(Frame* /*nextFrame*/, int /*currentFrameIndex*/)
+void TextureFrame::onEnter(Frame *nextFrame, int currentFrameIndex)
 {
     if(_sprite)
     {
@@ -210,7 +208,7 @@ RotationFrame::RotationFrame()
 {
 }
 
-void RotationFrame::onEnter(Frame *nextFrame, int /*currentFrameIndex*/)
+void RotationFrame::onEnter(Frame *nextFrame, int currentFrameIndex)
 {
     if (_node == nullptr)
     {
@@ -265,7 +263,7 @@ SkewFrame::SkewFrame()
 {
 }
 
-void SkewFrame::onEnter(Frame *nextFrame, int /*currentFrameIndex*/)
+void SkewFrame::onEnter(Frame *nextFrame, int currentFrameIndex)
 {
     if (_node == nullptr)
     {
@@ -325,7 +323,7 @@ RotationSkewFrame::RotationSkewFrame()
 {
 }
 
-void RotationSkewFrame::onEnter(Frame *nextFrame, int /*currentFrameIndex*/)
+void RotationSkewFrame::onEnter(Frame *nextFrame, int currentFrameIndex)
 {
     if (_node == nullptr)
     {
@@ -384,7 +382,7 @@ PositionFrame::PositionFrame()
 {
 }
 
-void PositionFrame::onEnter(Frame *nextFrame, int /*currentFrameIndex*/)
+void PositionFrame::onEnter(Frame *nextFrame, int currentFrameIndex)
 {
     if (_node == nullptr)
     {
@@ -443,7 +441,7 @@ ScaleFrame::ScaleFrame()
 {
 }
 
-void ScaleFrame::onEnter(Frame *nextFrame, int /*currentFrameIndex*/)
+void ScaleFrame::onEnter(Frame *nextFrame, int currentFrameIndex)
 {
     if (_node == nullptr)
     {
@@ -502,7 +500,7 @@ AnchorPointFrame::AnchorPointFrame()
 {
 }
 
-void AnchorPointFrame::onEnter(Frame *nextFrame, int /*currentFrameIndex*/)
+void AnchorPointFrame::onEnter(Frame *nextFrame, int currentFrameIndex)
 {
     if (_node == nullptr)
     {
@@ -563,7 +561,7 @@ InnerActionFrame::InnerActionFrame()
 
 }
 
-void InnerActionFrame::onEnter(Frame* /*nextFrame*/, int /*currentFrameIndex*/)
+void InnerActionFrame::onEnter(Frame *nextFrame, int currentFrameIndex)
 {
     if (_node == nullptr)
     {
@@ -692,7 +690,7 @@ ColorFrame::ColorFrame()
 {
 }
 
-void ColorFrame::onEnter(Frame *nextFrame, int /*currentFrameIndex*/)
+void ColorFrame::onEnter(Frame *nextFrame, int currentFrameIndex)
 {
     if (_node == nullptr)
     {
@@ -750,7 +748,7 @@ AlphaFrame::AlphaFrame()
 {
 }
 
-void AlphaFrame::onEnter(Frame *nextFrame, int /*currentFrameIndex*/)
+void AlphaFrame::onEnter(Frame *nextFrame, int currentFrameIndex)
 {
     if (_node == nullptr)
     {
@@ -814,7 +812,7 @@ void EventFrame::setNode(cocos2d::Node* node)
     _action = _timeline->getActionTimeline();
 }
 
-void EventFrame::onEnter(Frame* /*nextFrame*/, int currentFrameIndex)
+void EventFrame::onEnter(Frame *nextFrame, int currentFrameIndex)
 {
     if (static_cast<int>(_frameIndex) < _action->getStartFrame() || static_cast<int>(_frameIndex) > _action->getEndFrame())
         return;
@@ -853,7 +851,7 @@ ZOrderFrame::ZOrderFrame()
 {
 }
 
-void ZOrderFrame::onEnter(Frame* /*nextFrame*/, int /*currentFrameIndex*/)
+void ZOrderFrame::onEnter(Frame *nextFrame, int currentFrameIndex)
 {
     if(_node)
         _node->setLocalZOrder(_zorder);
@@ -889,7 +887,7 @@ BlendFuncFrame::BlendFuncFrame()
 {
 }
 
-void BlendFuncFrame::onEnter(Frame* /*nextFrame*/, int /*currentFrameIndex*/)
+void BlendFuncFrame::onEnter(Frame *nextFrame, int currentFrameIndex)
 {
     if(_node)
     {
@@ -931,7 +929,7 @@ PlayableFrame::PlayableFrame()
     
 }
 
-void PlayableFrame::onEnter(Frame* /*nextFrame*/, int /*currentFrameINdex*/)
+void PlayableFrame::onEnter(Frame *nextFrame, int currentFrameINdex)
 {
     auto playableNode = dynamic_cast<PlayableProtocol*>(_node);
     if (nullptr == playableNode) // may be a playable component

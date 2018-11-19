@@ -1,6 +1,5 @@
 /****************************************************************************
- Copyright (c) 2015-2016 Chukong Technologies Inc.
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2015 Chukong Technologies Inc.
  
  http://www.cocos2d-x.org
  
@@ -103,7 +102,7 @@ public:
     /**
      * draw the background
      */
-    virtual void drawBackground(Camera* /*camera*/) {}
+    virtual void drawBackground(Camera* camera) {}
 
     virtual bool isValid() { return true; }
 
@@ -159,9 +158,6 @@ protected:
     GLboolean _clearColor;
     
     V3F_C4B_T2F_Quad _quad;
-    GLuint      _vao;
-    GLuint      _vertexBuffer;
-    GLuint      _indexBuffer;
 };
 
 /**
@@ -183,11 +179,6 @@ public:
      * @return Created brush
      */
     static CameraBackgroundColorBrush* create(const Color4F& color, float depth);
-    
-    /**
-     * Draw background
-     */
-    virtual void drawBackground(Camera* camera) override;
     
     /**
      * Set clear color

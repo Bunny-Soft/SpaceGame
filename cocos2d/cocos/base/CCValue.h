@@ -1,6 +1,5 @@
 /****************************************************************************
- Copyright (c) 2013-2017 Chukong Technologies
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2013-2014 Chukong Technologies
 
  http://www.cocos2d-x.org
 
@@ -188,7 +187,7 @@ public:
      * Checks if the Value is null.
      * @return True if the Value is null, false if not.
      */
-    bool isNull() const { return _type == Type::NONE; }
+    inline bool isNull() const { return _type == Type::NONE; }
 
     /** Value type wrapped by Value. */
     enum class Type
@@ -218,7 +217,7 @@ public:
     };
 
     /** Gets the value type. */
-    Type getType() const { return _type; }
+    inline Type getType() const { return _type; }
 
     /** Gets the description of the class. */
     std::string getDescription() const;

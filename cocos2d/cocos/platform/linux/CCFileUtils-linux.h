@@ -1,7 +1,6 @@
 /****************************************************************************
 Copyright (c) 2011      Laschweinski
-Copyright (c) 2013-2016 Chukong Technologies Inc.
-Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+Copyright (c) 2013-2014 Chukong Technologies Inc.
 
 http://www.cocos2d-x.org
 
@@ -52,8 +51,8 @@ private:
     std::string _writablePath;
 public:
     /* override functions */
-    bool init() override;
-    virtual std::string getWritablePath() const override;
+    bool init();
+    virtual std::string getWritablePath() const;
 private:
     virtual bool isFileExistInternal(const std::string& strFilePath) const override;
 };

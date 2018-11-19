@@ -1,7 +1,6 @@
 /****************************************************************************
  Copyright (C) 2013 Henry van Merode. All rights reserved.
- Copyright (c) 2015-2016 Chukong Technologies Inc.
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2015 Chukong Technologies Inc.
  
  http://www.cocos2d-x.org
  
@@ -1049,8 +1048,6 @@ void PUParticleSystem3D::convertToUnixStylePath( std::string &path )
     for (auto &iter : path){
         if (iter == '\\') iter = '/';
     }
-#else
-    CC_UNUSED_PARAM(path);
 #endif
 }
 
@@ -1310,7 +1307,7 @@ bool PUParticleSystem3D::makeParticleLocal( PUParticle3D* particle )
     return true;
 }
 
-void PUParticleSystem3D::processMotion( PUParticle3D* particle, float timeElapsed, const Vec3 &scl, bool /*firstParticle*/ )
+void PUParticleSystem3D::processMotion( PUParticle3D* particle, float timeElapsed, const Vec3 &scl, bool firstParticle )
 {
     if (particle->isFreezed())
     return;

@@ -1,7 +1,6 @@
 /****************************************************************************
  Copyright (c) 2013      Zynga Inc.
- Copyright (c) 2013-2016 Chukong Technologies Inc.
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2013-2014 Chukong Technologies Inc.
 
  http://www.cocos2d-x.org
 
@@ -85,10 +84,14 @@ public:
             float y1 = _offsetPosition.y;
             float x2 = x1 + size.width;
             float y2 = y1 + size.height;
-
-            // issue #17022: don't flip, again, the letter since they are flipped in sprite's code
-            //if (_flippedX) std::swap(x1, x2);
-            //if (_flippedY) std::swap(y1, y2);
+            if (_flippedX)
+            {
+                std::swap(x1, x2);
+            }
+            if (_flippedY)
+            {
+                std::swap(y1, y2);
+            }
 
             float x = _transformToBatch.m[12];
             float y = _transformToBatch.m[13];
@@ -159,7 +162,7 @@ public:
     }
     
     //LabelLetter doesn't need to draw directly.
-    void draw(Renderer* /*renderer*/, const Mat4 & /*transform*/, uint32_t /*flags*/) override
+    void draw(Renderer *renderer, const Mat4 &transform, uint32_t flags) override
     {
     }
     
@@ -314,10 +317,8 @@ bool Label::setCharMap(const std::string& plistFile)
 }
 
 
-bool Label::initWithTTF(const std::string& text,
-                        const std::string& fontFilePath, float fontSize,
-                        const Size& dimensions,
-                        TextHAlignment /*hAlignment*/, TextVAlignment /*vAlignment*/)
+bool Label::initWithTTF(const std::string& text, const std::string& fontFilePath, float fontSize,
+                        const Size& dimensions, TextHAlignment hAlignment, TextVAlignment vAlignment)
 {
     if (FileUtils::getInstance()->isFileExist(fontFilePath))
     {
@@ -332,7 +333,7 @@ bool Label::initWithTTF(const std::string& text,
     return false;
 }
 
-bool Label::initWithTTF(const TTFConfig& ttfConfig, const std::string& text, TextHAlignment /*hAlignment*/, int maxLineWidth)
+bool Label::initWithTTF(const TTFConfig& ttfConfig, const std::string& text, TextHAlignment hAlignment, int maxLineWidth)
 {
     if (FileUtils::getInstance()->isFileExist(ttfConfig.fontFilePath) && setTTFConfig(ttfConfig))
     {
@@ -417,12 +418,7 @@ Label::Label(TextHAlignment hAlignment /* = TextHAlignment::LEFT */,
         if (_fontAtlas && _currentLabelType == LabelType::TTF && event->getUserData() == _fontAtlas)
         {
             _fontAtlas = nullptr;
-            auto lineHeight = _lineHeight;
             this->setTTFConfig(_fontConfig);
-            if (_currentLabelType != LabelType::STRING_TEXTURE)
-            {
-                setLineHeight(lineHeight);
-            }
             for (auto&& it : _letters)
             {
                 getLetter(it.first);
@@ -470,7 +466,7 @@ void Label::reset()
     _contentDirty = false;
     _numberOfLines = 0;
     _lengthOfString = 0;
-    _utf32Text.clear();
+    _utf16Text.clear();
     _utf8Text.clear();
 
     TTFConfig temp;
@@ -507,10 +503,6 @@ void Label::reset()
     _shadowEnabled = false;
     _shadowBlurRadius = 0.f;
 
-    _uniformEffectColor = -1;
-    _uniformEffectType = -1;
-    _uniformTextColor = -1;
-
     _useDistanceField = false;
     _useA8Shader = false;
     _clipEnabled = false;
@@ -535,18 +527,23 @@ void Label::reset()
 
 //  ETC1 ALPHA supports, for LabelType::BMFONT & LabelType::CHARMAP
 static Texture2D* _getTexture(Label* label)
-{
+ {
+    struct _FontAtlasPub : public FontAtlas
+    {
+        Texture2D* getTexture()
+        {
+            if (!_atlasTextures.empty())
+                return _atlasTextures.begin()->second;
+            return nullptr;
+        }
+    };
+
     auto fontAtlas = label->getFontAtlas();
     Texture2D* texture = nullptr;
-    if (fontAtlas != nullptr) {
-        auto textures = fontAtlas->getTextures();
-        if(!textures.empty()) {
-            texture = textures.begin()->second;
-        }
-    }
+    if (fontAtlas != nullptr)
+        texture = ((_FontAtlasPub*)(fontAtlas))->getTexture();
     return texture;
 }
-
 void Label::updateShaderProgram()
 {
     switch (_currLabelEffect)
@@ -565,7 +562,6 @@ void Label::updateShaderProgram()
     case cocos2d::LabelEffect::OUTLINE: 
         setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_LABEL_OUTLINE));
         _uniformEffectColor = glGetUniformLocation(getGLProgram()->getProgram(), "u_effectColor");
-        _uniformEffectType = glGetUniformLocation(getGLProgram()->getProgram(), "u_effectType");
         break;
     case cocos2d::LabelEffect::GLOW:
         if (_useDistanceField)
@@ -589,16 +585,19 @@ void Label::setFontAtlas(FontAtlas* atlas,bool distanceFieldEnabled /* = false *
     }
 
     if (atlas == _fontAtlas)
+    {
+        FontAtlasCache::releaseFontAtlas(atlas);
         return;
+    }
 
-    CC_SAFE_RETAIN(atlas);
     if (_fontAtlas)
     {
         _batchNodes.clear();
         FontAtlasCache::releaseFontAtlas(_fontAtlas);
+        _fontAtlas = nullptr;
     }
+
     _fontAtlas = atlas;
-    
     if (_reusedLetter == nullptr)
     {
         _reusedLetter = Sprite::create();
@@ -667,10 +666,10 @@ void Label::setString(const std::string& text)
         _utf8Text = text;
         _contentDirty = true;
 
-        std::u32string utf32String;
-        if (StringUtils::UTF8ToUTF32(_utf8Text, utf32String))
+        std::u16string utf16String;
+        if (StringUtils::UTF8ToUTF16(_utf8Text, utf16String))
         {
-            _utf32Text  = utf32String;
+            _utf16Text  = utf16String;
         }
     }
 }
@@ -761,7 +760,7 @@ void Label::updateLabelLetters()
             else
             {
                 auto& letterInfo = _lettersInfo[letterIndex];
-                auto& letterDef = _fontAtlas->_letterDefinitions[letterInfo.utf32Char];
+                auto& letterDef = _fontAtlas->_letterDefinitions[letterInfo.utf16Char];
                 uvRect.size.height = letterDef.height;
                 uvRect.size.width = letterDef.width;
                 uvRect.origin.x = letterDef.U;
@@ -794,7 +793,7 @@ void Label::updateLabelLetters()
 
 bool Label::alignText()
 {
-    if (_fontAtlas == nullptr || _utf32Text.empty())
+    if (_fontAtlas == nullptr || _utf16Text.empty())
     {
         setContentSize(Size::ZERO);
         return true;
@@ -802,12 +801,11 @@ bool Label::alignText()
 
     bool ret = true;
     do {
-        _fontAtlas->prepareLetterDefinitions(_utf32Text);
+        _fontAtlas->prepareLetterDefinitions(_utf16Text);
         auto& textures = _fontAtlas->getTextures();
-        auto size = textures.size();
-        if (size > static_cast<size_t>(_batchNodes.size()))
+        if (textures.size() > static_cast<size_t>(_batchNodes.size()))
         {
-            for (auto index = static_cast<size_t>(_batchNodes.size()); index < size; ++index)
+            for (auto index = static_cast<size_t>(_batchNodes.size()); index < textures.size(); ++index)
             {
                 auto batchNode = SpriteBatchNode::createWithTexture(textures.at(index));
                 if (batchNode)
@@ -824,12 +822,6 @@ bool Label::alignText()
         {
             return true;
         }
-        // optimize for one-texture-only scenario
-        // if multiple textures, then we should count how many chars
-        // are per texture
-        if (_batchNodes.size()==1)
-            _batchNodes.at(0)->reserveCapacity(_utf32Text.size());
-
         _reusedLetter->setBatchNode(_batchNodes.at(0));
         
         _lengthOfString = 0;
@@ -869,7 +861,7 @@ bool Label::alignText()
     return ret;
 }
 
-bool Label::computeHorizontalKernings(const std::u32string& stringToRender)
+bool Label::computeHorizontalKernings(const std::u16string& stringToRender)
 {
     if (_horizontalKernings)
     {
@@ -878,7 +870,7 @@ bool Label::computeHorizontalKernings(const std::u32string& stringToRender)
     }
 
     int letterCount = 0;
-    _horizontalKernings = _fontAtlas->getFont()->getHorizontalKerningForTextUTF32(stringToRender, letterCount);
+    _horizontalKernings = _fontAtlas->getFont()->getHorizontalKerningForTextUTF16(stringToRender, letterCount);
 
     if(!_horizontalKernings)
         return false;
@@ -905,11 +897,12 @@ bool Label::updateQuads()
         batchNode->getTextureAtlas()->removeAllQuads();
     }
     
+    bool letterClamp = false;
     for (int ctr = 0; ctr < _lengthOfString; ++ctr)
     {
         if (_lettersInfo[ctr].valid)
         {
-            auto& letterDef = _fontAtlas->_letterDefinitions[_lettersInfo[ctr].utf32Char];
+            auto& letterDef = _fontAtlas->_letterDefinitions[_lettersInfo[ctr].utf16Char];
             
             _reusedRect.size.height = letterDef.height;
             _reusedRect.size.width  = letterDef.width;
@@ -940,6 +933,7 @@ bool Label::updateQuads()
                         _reusedRect.size.width = 0;
                     }else if(_overflow == Overflow::SHRINK){
                         if (_contentSize.width > letterDef.width) {
+                            letterClamp = true;
                             ret = false;
                             break;
                         }else{
@@ -1094,9 +1088,7 @@ void Label::enableOutline(const Color4B& outlineColor,int outlineSize /* = -1 */
     }
 }
 
-void Label::enableShadow(const Color4B& shadowColor /* = Color4B::BLACK */,
-                         const Size &offset /* = Size(2 ,-2)*/,
-                         int /* blurRadius = 0 */)
+void Label::enableShadow(const Color4B& shadowColor /* = Color4B::BLACK */,const Size &offset /* = Size(2 ,-2)*/, int blurRadius /* = 0 */)
 {
     _shadowEnabled = true;
     _shadowDirty = true;
@@ -1222,11 +1214,9 @@ void Label::disableEffect(LabelEffect effect)
             setRotationSkewX(0);
             break;
         case cocos2d::LabelEffect::BOLD:
-            if (_boldEnabled) {
-                _boldEnabled = false;
-                _additionalKerning -= 1;
-                disableEffect(LabelEffect::SHADOW);
-            }
+            _boldEnabled = false;
+            _additionalKerning -= 1;
+            disableEffect(LabelEffect::SHADOW);
             break;
         case cocos2d::LabelEffect::UNDERLINE:
             if (_underlineNode) {
@@ -1374,7 +1364,7 @@ void Label::updateContent()
         if (_fontAtlas)
         {
             _batchNodes.clear();
-            CC_SAFE_RELEASE_NULL(_reusedLetter);
+
             FontAtlasCache::releaseFontAtlas(_fontAtlas);
             _fontAtlas = nullptr;
         }
@@ -1388,13 +1378,13 @@ void Label::updateContent()
 
     if (_fontAtlas)
     {
-        std::u32string utf32String;
-        if (StringUtils::UTF8ToUTF32(_utf8Text, utf32String))
+        std::u16string utf16String;
+        if (StringUtils::UTF8ToUTF16(_utf8Text, utf16String))
         {
-            _utf32Text = utf32String;
+            _utf16Text = utf16String;
         }
 
-        computeHorizontalKernings(_utf32Text);
+        computeHorizontalKernings(_utf16Text);
         updateFinished = alignText();
     }
     else
@@ -1413,7 +1403,6 @@ void Label::updateContent()
 
         if (_numberOfLines)
         {
-            // This is the logic for TTF fonts
             const float charheight = (_textDesiredHeight / _numberOfLines);
             _underlineNode->setLineWidth(charheight/6);
 
@@ -1425,15 +1414,12 @@ void Label::updateContent()
                     offsety += charheight / 2;
                 // FIXME: Might not work with different vertical alignments
                 float y = (_numberOfLines - i - 1) * charheight + offsety;
-
-                // Github issue #15214. Uses _displayedColor instead of _textColor for the underline.
-                // This is to have the same behavior of SystemFonts.
-                _underlineNode->drawLine(Vec2(_linesOffsetX[i],y), Vec2(_linesWidth[i] + _linesOffsetX[i],y), Color4F(_displayedColor));
+                _underlineNode->drawLine(Vec2(_linesOffsetX[i],y), Vec2(_linesWidth[i] + _linesOffsetX[i],y), _textColorF);
             }
         }
         else if (_textSprite)
         {
-            // ...and is the logic for System fonts
+            // system font
             float y = 0;
             const auto spriteSize = _textSprite->getContentSize();
             _underlineNode->setLineWidth(spriteSize.height/6);
@@ -1478,18 +1464,12 @@ void Label::onDrawShadow(GLProgram* glProgram, const Color4F& shadowColor)
 {
     if (_currentLabelType == LabelType::TTF)
     {
-        if (_currLabelEffect == LabelEffect::OUTLINE)
+        glProgram->setUniformLocationWith4f(_uniformTextColor,
+            shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a);
+        if (_currLabelEffect == LabelEffect::OUTLINE || _currLabelEffect == LabelEffect::GLOW)
         {
-            glProgram->setUniformLocationWith1i(_uniformEffectType, 2); // 2: shadow
-            glProgram->setUniformLocationWith4f(_uniformEffectColor, shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a);
-        }
-        else
-        {
-            glProgram->setUniformLocationWith4f(_uniformTextColor, shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a);
-            if (_currLabelEffect == LabelEffect::GLOW)
-            {
-                glProgram->setUniformLocationWith4f(_uniformEffectColor, shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a);
-            }
+            glProgram->setUniformLocationWith4f(_uniformEffectColor,
+                shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a);
         }
 
         glProgram->setUniformsForBuiltins(_shadowTransform);
@@ -1506,7 +1486,7 @@ void Label::onDrawShadow(GLProgram* glProgram, const Color4F& shadowColor)
     {
         Color3B oldColor = _realColor;
         GLubyte oldOPacity = _displayedOpacity;
-        _displayedOpacity = shadowColor.a * (oldOPacity / 255.0f) * 255;
+        _displayedOpacity = shadowColor.a * 255;
         setColor(Color3B(shadowColor));
 
         glProgram->setUniformsForBuiltins(_shadowTransform);
@@ -1524,7 +1504,7 @@ void Label::onDrawShadow(GLProgram* glProgram, const Color4F& shadowColor)
     }
 }
 
-void Label::onDraw(const Mat4& transform, bool /*transformUpdated*/)
+void Label::onDraw(const Mat4& transform, bool transformUpdated)
 {
     auto glprogram = getGLProgram();
     glprogram->use();
@@ -1548,8 +1528,9 @@ void Label::onDraw(const Mat4& transform, bool /*transformUpdated*/)
     {
         switch (_currLabelEffect) {
         case LabelEffect::OUTLINE:
-            // draw outline of text
-            glprogram->setUniformLocationWith1i(_uniformEffectType, 1); // 1: outline
+            //draw text with outline
+            glprogram->setUniformLocationWith4f(_uniformTextColor,
+                _textColorF.r, _textColorF.g, _textColorF.b, _textColorF.a);
             glprogram->setUniformLocationWith4f(_uniformEffectColor,
                 _effectColorF.r, _effectColorF.g, _effectColorF.b, _effectColorF.a);
             for (auto&& batchNode : _batchNodes)
@@ -1557,9 +1538,9 @@ void Label::onDraw(const Mat4& transform, bool /*transformUpdated*/)
                 batchNode->getTextureAtlas()->drawQuads();
             }
 
-            // draw text without outline
-            glprogram->setUniformLocationWith1i(_uniformEffectType, 0); // 0: text
-            glprogram->setUniformLocationWith4f(_uniformTextColor, _textColorF.r, _textColorF.g, _textColorF.b, _textColorF.a);
+            //draw text without outline
+            glprogram->setUniformLocationWith4f(_uniformEffectColor,
+                _effectColorF.r, _effectColorF.g, _effectColorF.b, 0.f);
             break;
         case LabelEffect::GLOW:
             glprogram->setUniformLocationWith4f(_uniformEffectColor,
@@ -1671,7 +1652,7 @@ void Label::visit(Renderer *renderer, const Mat4 &parentTransform, uint32_t pare
 
         int i = 0;
         // draw children zOrder < 0
-        for (auto size = _children.size(); i < size; ++i)
+        for (; i < _children.size(); i++)
         {
             auto node = _children.at(i);
 
@@ -1683,7 +1664,7 @@ void Label::visit(Renderer *renderer, const Mat4 &parentTransform, uint32_t pare
         
         this->drawSelf(visibleByCamera, renderer, flags);
 
-        for (auto it = _children.cbegin() + i, itCend = _children.cend(); it != itCend; ++it)
+        for (auto it = _children.cbegin() + i; it != _children.cend(); ++it)
         {
             (*it)->visit(renderer, _modelViewTransform, flags);
         }
@@ -1754,7 +1735,7 @@ Sprite* Label::getLetter(int letterIndex)
         if (_textSprite == nullptr && letterIndex < _lengthOfString)
         {
             const auto &letterInfo = _lettersInfo[letterIndex];
-            if (!letterInfo.valid || letterInfo.atlasIndex<0)
+            if (!letterInfo.valid)
             {
                 break;
             }
@@ -1766,7 +1747,7 @@ Sprite* Label::getLetter(int letterIndex)
 
             if (letter == nullptr)
             {
-                auto& letterDef = _fontAtlas->_letterDefinitions[letterInfo.utf32Char];
+                auto& letterDef = _fontAtlas->_letterDefinitions[letterInfo.utf16Char];
                 auto textureID = letterDef.textureID;
                 Rect uvRect;
                 uvRect.size.height = letterDef.height;
@@ -1780,15 +1761,13 @@ Sprite* Label::getLetter(int letterIndex)
                 }
                 else
                 {
-                    this->updateBMFontScale();
                     letter = LabelLetter::createWithTexture(_fontAtlas->getTexture(textureID), uvRect);
                     letter->setTextureAtlas(_batchNodes.at(textureID)->getTextureAtlas());
                     letter->setAtlasIndex(letterInfo.atlasIndex);
-                    auto px = letterInfo.positionX + _bmfontScale * uvRect.size.width / 2 + _linesOffsetX[letterInfo.lineIndex];
-                    auto py = letterInfo.positionY - _bmfontScale * uvRect.size.height / 2 + _letterOffsetY;
+                    auto px = letterInfo.positionX + uvRect.size.width / 2 + _linesOffsetX[letterInfo.lineIndex];
+                    auto py = letterInfo.positionY - uvRect.size.height / 2 + _letterOffsetY;
                     letter->setPosition(px,py);
                     letter->setOpacity(_realOpacity);
-                    this->updateLetterSpriteScale(letter);
                 }
                 
                 addChild(letter);
@@ -1857,17 +1836,17 @@ void Label::computeStringNumLines()
 {
     int quantityOfLines = 1;
 
-    if (_utf32Text.empty())
+    if (_utf16Text.empty())
     {
         _numberOfLines = 0;
         return;
     }
 
     // count number of lines
-    size_t stringLen = _utf32Text.length();
+    size_t stringLen = _utf16Text.length();
     for (size_t i = 0; i < stringLen - 1; ++i)
     {
-        if (_utf32Text[i] == StringUtils::UnicodeCharacters::NewLine)
+        if (_utf16Text[i] == (char16_t)TextFormatter::NewLine)
         {
             quantityOfLines++;
         }
@@ -1893,7 +1872,7 @@ int Label::getStringNumLines()
 
 int Label::getStringLength()
 {
-    _lengthOfString = static_cast<int>(_utf32Text.length());
+    _lengthOfString = static_cast<int>(_utf16Text.length());
     return _lengthOfString;
 }
 
@@ -1911,6 +1890,9 @@ void Label::updateDisplayedColor(const Color3B& parentColor)
 {
     Node::updateDisplayedColor(parentColor);
 
+    if (_currentLabelType == LabelType::TTF || _currentLabelType == LabelType::STRING_TEXTURE)
+        setTextColor(Color4B(_displayedColor));
+
     if (_textSprite)
     {
         _textSprite->updateDisplayedColor(_displayedColor);
@@ -1923,17 +1905,12 @@ void Label::updateDisplayedColor(const Color3B& parentColor)
 
     if (_underlineNode)
     {
-        // FIXME: _underlineNode is not a sprite/label. It is a DrawNode
-        // and updating its color doesn't work. it must be re-drawn,
-        // which makes it super expensive to change update it frequently
-        // Correct solution is to update the DrawNode directly since we know it is
-        // a line. Returning a pointer to the line is an option
         _contentDirty = true;
     }
 
     for (auto&& it : _letters)
     {
-        it.second->updateDisplayedColor(_displayedColor);
+        it.second->updateDisplayedColor(_displayedColor);;
     }
 }
 
@@ -1952,13 +1929,10 @@ void Label::updateDisplayedOpacity(GLubyte parentOpacity)
 
     for (auto&& it : _letters)
     {
-        it.second->updateDisplayedOpacity(_displayedOpacity);
+        it.second->updateDisplayedOpacity(_displayedOpacity);;
     }
 }
 
-// FIXME: it is not clear what is the difference between setTextColor() and setColor()
-// if setTextColor() only changes the text and nothing but the text (no glow, no outline, not underline)
-// that's fine but it should be documented
 void Label::setTextColor(const Color4B &color)
 {
     CCASSERT(_currentLabelType == LabelType::TTF || _currentLabelType == LabelType::STRING_TEXTURE, "Only supported system font and ttf!");

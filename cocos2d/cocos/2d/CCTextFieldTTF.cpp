@@ -1,7 +1,6 @@
 /****************************************************************************
 Copyright (c) 2010-2012 cocos2d-x.org
-Copyright (c) 2013-2016 Chukong Technologies Inc.
-Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+Copyright (c) 2013-2014 Chukong Technologies Inc.
 
 http://www.cocos2d-x.org
 
@@ -36,7 +35,7 @@ NS_CC_BEGIN
 #define CURSOR_TIME_SHOW_HIDE 0.5f
 #define CURSOR_DEFAULT_CHAR '|'
 #define PASSWORD_STYLE_TEXT_DEFAULT "\xe2\x80\xa2"
-static std::size_t _calcCharCount(const char * text)
+static int _calcCharCount(const char * text)
 {
     int n = 0;
     char ch = 0;
@@ -51,31 +50,6 @@ static std::size_t _calcCharCount(const char * text)
         ++text;
     }
     return n;
-}
-
-bool TextFieldDelegate::onTextFieldAttachWithIME(TextFieldTTF* /*sender*/)
-{
-    return false;
-}
-
-bool TextFieldDelegate::onTextFieldDetachWithIME(TextFieldTTF* /*sender*/)
-{
-    return false;
-}
-
-bool TextFieldDelegate::onTextFieldInsertText(TextFieldTTF* /*sender*/, const char* /*text*/, size_t /*nLen*/)
-{
-    return false;
-}
-
-bool TextFieldDelegate::onTextFieldDeleteBackward(TextFieldTTF* /*sender*/, const char* /*delText*/, size_t /*nLen*/)
-{
-    return false;
-}
-
-bool TextFieldDelegate::onVisit(TextFieldTTF* /*sender*/, Renderer* /*renderer*/, const Mat4& /*transform*/, uint32_t /*flags*/)
-{
-    return false;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -171,8 +145,9 @@ bool TextFieldTTF::initWithPlaceHolder(const std::string& placeholder, const std
         setSystemFontSize(fontSize);
 
     } while (false);
-    
-    setTextColorInternally(_colorSpaceHolder);
+
+
+    Label::setTextColor(_colorSpaceHolder);
     Label::setString(_placeHolder);
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_MAC || CC_TARGET_PLATFORM == CC_PLATFORM_WIN32 || CC_TARGET_PLATFORM == CC_PLATFORM_LINUX)
@@ -245,7 +220,7 @@ void TextFieldTTF::insertText(const char * text, size_t len)
     std::string insert(text, len);
 
     // insert \n means input end
-    int pos = static_cast<int>(insert.find(StringUtils::AsciiCharacters::NewLine));
+    int pos = static_cast<int>(insert.find((char)TextFormatter::NewLine));
     if ((int)insert.npos != pos)
     {
         len = pos;
@@ -260,7 +235,7 @@ void TextFieldTTF::insertText(const char * text, size_t len)
             return;
         }
 
-        std::size_t countInsertChar = _calcCharCount(insert.c_str());
+        int countInsertChar = _calcCharCount(insert.c_str());
         _charCount += countInsertChar;
 
         if (_cursorEnabled)
@@ -270,7 +245,7 @@ void TextFieldTTF::insertText(const char * text, size_t len)
             stringUTF8.replace(_inputText);
             stringUTF8.insert(_cursorPosition, insert);
 
-            setCursorPosition(_cursorPosition + countInsertChar);
+            setCursorPosition(_cursorPosition + countInsertChar);            
 
             setString(stringUTF8.getAsCharSequence());
         }
@@ -382,17 +357,14 @@ void TextFieldTTF::setCursorFromPoint(const Vec2 &point, const Camera* camera)
             int latterPosition = 0;
             for (; latterPosition < _lengthOfString; ++latterPosition)
             {
-                if (_lettersInfo[latterPosition].valid && _lettersInfo[latterPosition].atlasIndex >= 0)
+                if (_lettersInfo[latterPosition].valid)
                 {
                     auto sprite = getLetter(latterPosition);
-                    if (sprite)
+                    rect.size = sprite->getContentSize();
+                    if (isScreenPointInRect(point, camera, sprite->getWorldToNodeTransform(), rect, nullptr))
                     {
-                        rect.size = sprite->getContentSize();
-                        if (isScreenPointInRect(point, camera, sprite->getWorldToNodeTransform(), rect, nullptr))
-                        {
-                            setCursorPosition(latterPosition);
-                            break;
-                        }
+                        setCursorPosition(latterPosition);
+                        break;
                     }
                 }
             }
@@ -422,22 +394,12 @@ void TextFieldTTF::setAttachWithIME(bool isAttachWithIME)
     }
 }
 
-void TextFieldTTF::setTextColorInternally(const Color4B& color)
-{
-    if (_currentLabelType == LabelType::BMFONT) {
-        Label::setColor(Color3B(color));
-        return;
-    }
-    
-    Label::setTextColor(color);
-}
-
 void TextFieldTTF::setTextColor(const Color4B &color)
 {
     _colorText = color;
-    if (!_inputText.empty())
+    if (!_inputText.empty()) 
     {
-        setTextColorInternally(color);
+        Label::setTextColor(_colorText);
     }
 }
 
@@ -464,9 +426,6 @@ void TextFieldTTF::update(float delta)
 
         if (sprite)
         {
-            if (_currentLabelType == LabelType::BMFONT) {
-                sprite->setColor(getColor());
-            }
             if (_cursorShowingTime >= 0.0f)
             {
                 sprite->setOpacity(255);
@@ -487,7 +446,14 @@ const Color4B& TextFieldTTF::getColorSpaceHolder()
 
 void TextFieldTTF::setColorSpaceHolder(const Color3B& color)
 {
-    setColorSpaceHolder(Color4B(color));
+    _colorSpaceHolder.r = color.r;
+    _colorSpaceHolder.g = color.g;
+    _colorSpaceHolder.b = color.b;
+    _colorSpaceHolder.a = 255;
+    if (_inputText.empty())
+    {
+        Label::setTextColor(_colorSpaceHolder);
+    }
 }
 
 void TextFieldTTF::setColorSpaceHolder(const Color4B& color)
@@ -495,7 +461,7 @@ void TextFieldTTF::setColorSpaceHolder(const Color4B& color)
     _colorSpaceHolder = color;
     if (_inputText.empty())
     {
-        setTextColorInternally(_colorSpaceHolder);
+        Label::setTextColor(_colorSpaceHolder);
     }
 }
 
@@ -508,8 +474,7 @@ void TextFieldTTF::setString(const std::string &text)
 {
     std::string displayText;
 
-    std::size_t charCount = 0;
-
+    int charCount = 0;
     if (!text.empty())
     {
         _inputText = text;
@@ -545,13 +510,14 @@ void TextFieldTTF::setString(const std::string &text)
     // if there is no input text, display placeholder instead
     if (_inputText.empty() && (!_cursorEnabled || !_isAttachWithIME))
     {
-        setTextColorInternally(_colorSpaceHolder);
+        Label::setTextColor(_colorSpaceHolder);
         Label::setString(_placeHolder);
     }
     else
     {
         makeStringSupportCursor(displayText);
-        setTextColorInternally(_colorText);
+
+        Label::setTextColor(_colorText);
         Label::setString(displayText);
     }
     _charCount = charCount;
@@ -571,8 +537,7 @@ void TextFieldTTF::makeStringSupportCursor(std::string& displayText)
         if (displayText.empty())
         {
             // \b - Next char not change x position
-            if (_currentLabelType == LabelType::TTF || _currentLabelType == LabelType::BMFONT)
-                displayText.push_back(StringUtils::AsciiCharacters::NextCharNoChangeX);
+            displayText.push_back((char)TextFormatter::NextCharNoChangeX);
             displayText.push_back(_cursorChar);
         }
         else
@@ -587,8 +552,7 @@ void TextFieldTTF::makeStringSupportCursor(std::string& displayText)
             }
             std::string cursorChar;
             // \b - Next char not change x position
-            if (_currentLabelType == LabelType::TTF || _currentLabelType == LabelType::BMFONT)
-                cursorChar.push_back(StringUtils::AsciiCharacters::NextCharNoChangeX);
+            cursorChar.push_back((char)TextFormatter::NextCharNoChangeX);
             cursorChar.push_back(_cursorChar);
             stringUTF8.insert(_cursorPosition, cursorChar);
 
@@ -672,9 +636,9 @@ const std::string& TextFieldTTF::getString() const
 void TextFieldTTF::setPlaceHolder(const std::string& text)
 {
     _placeHolder = text;
-    if (_inputText.empty() && !_isAttachWithIME)
+    if (_inputText.empty())
     {
-        setTextColorInternally(_colorSpaceHolder);
+        Label::setTextColor(_colorSpaceHolder);
         Label::setString(_placeHolder);
     }
 }
@@ -686,24 +650,28 @@ const std::string& TextFieldTTF::getPlaceHolder() const
 
 void TextFieldTTF::setCursorEnabled(bool enabled)
 {
-    if (_cursorEnabled == enabled)
+    if (_currentLabelType == LabelType::TTF)
     {
-        return;
-    }
-    
-    _cursorEnabled = enabled;
-    if (_cursorEnabled)
-    {
-        _cursorPosition = _charCount;
-        if (_currentLabelType == LabelType::TTF || _currentLabelType == LabelType::BMFONT) {
-            scheduleUpdate();
+        if (_cursorEnabled != enabled)
+        {
+            _cursorEnabled = enabled;
+            if (_cursorEnabled)
+            {
+                _cursorPosition = _charCount;
+
+                scheduleUpdate();
+            }
+            else
+            {
+                _cursorPosition = 0;
+
+                unscheduleUpdate();
+            }
         }
-        return;
     }
-    
-    _cursorPosition = 0;
-    if (_currentLabelType == LabelType::TTF || _currentLabelType == LabelType::BMFONT) {
-        unscheduleUpdate();
+    else
+    {
+        CCLOG("TextFieldTTF cursor worked only LabelType::TTF");
     }
 }
 
@@ -730,7 +698,7 @@ void TextFieldTTF::setPasswordTextStyle(const std::string &text)
     }
 }
 
-const std::string& TextFieldTTF::getPasswordTextStyle() const
+std::string TextFieldTTF::getPasswordTextStyle()const
 {
     return _passwordStyleText;
 }
@@ -741,4 +709,3 @@ bool TextFieldTTF::isSecureTextEntry() const
 }
 
 NS_CC_END
-

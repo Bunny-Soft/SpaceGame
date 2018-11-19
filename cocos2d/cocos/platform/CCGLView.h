@@ -1,7 +1,6 @@
 /****************************************************************************
 Copyright (c) 2010-2012 cocos2d-x.org
-Copyright (c) 2013-2016 Chukong Technologies Inc.
-Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+Copyright (c) 2013-2014 Chukong Technologies Inc.
 
 http://www.cocos2d-x.org
 
@@ -83,7 +82,6 @@ struct GLContextAttrs
     int alphaBits;
     int depthBits;
     int stencilBits;
-    int multisamplingCount;
 };
 
 NS_CC_BEGIN
@@ -167,7 +165,7 @@ public:
      *
      * @return The frame size of EGL view.
      */
-    virtual Size getFrameSize() const;
+    virtual const Size& getFrameSize() const;
 
     /**
      * Set the frame size of EGL view.
@@ -182,7 +180,7 @@ public:
      * 
      * @param zoomFactor The zoom factor for frame.
      */
-    virtual void setFrameZoomFactor(float /*zoomFactor*/) {}
+    virtual void setFrameZoomFactor(float zoomFactor) {}
     
     /** Get zoom factor for frame. This methods are for
      * debugging big resolution (e.g.new ipad) app on desktop.
@@ -196,7 +194,7 @@ public:
      *
      * @param isVisible Hide or Show the mouse cursor if there is one.
      */
-    virtual void setCursorVisible(bool /*isVisible*/) {}
+    virtual void setCursorVisible(bool isVisible) {}
 
     /** Get retina factor.
      *
@@ -205,7 +203,7 @@ public:
     virtual int getRetinaFactor() const { return 1; }
 
     /** Only works on ios platform. Set Content Scale of the Factor. */
-    virtual bool setContentScaleFactor(float /*scaleFactor*/) { return false; }
+    virtual bool setContentScaleFactor(float scaleFactor) { return false; }
     
     /** Only works on ios platform. Get Content Scale of the Factor. */
     virtual float getContentScaleFactor() const { return 1.0; }
@@ -240,11 +238,6 @@ public:
      * @return The visible rectangle of opengl viewport.
      */
     virtual Rect getVisibleRect() const;
-
-    /**
-     * Gets safe area rectangle
-     */
-    virtual Rect getSafeAreaRect() const;
 
     /**
      * Set the design resolution size.

@@ -1,6 +1,5 @@
 /****************************************************************************
- Copyright (c) 2013-2016 Chukong Technologies Inc.
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2013-2014 Chukong Technologies Inc.
 
  http://www.cocos2d-x.org
 
@@ -80,12 +79,12 @@ public:
      * @brief Set the effect grid rect.
      * @param gridRect The effect grid rect.
      */
-    void setGridRect(const Rect& gridRect) { _gridRect = gridRect; }
+    inline void setGridRect(const Rect& gridRect){_gridRect = gridRect;}
     /**
      * @brief Get the effect grid rect.
      * @return Return the effect grid rect.
      */
-    const Rect& getGridRect() const { return _gridRect; }
+    inline const Rect& getGridRect() const { return _gridRect;}
 
     // overrides
     virtual void visit(Renderer *renderer, const Mat4 &parentTransform, uint32_t parentFlags) override;

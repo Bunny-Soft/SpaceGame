@@ -1,7 +1,6 @@
 /****************************************************************************
  Copyright (c) 2013      Zynga Inc.
- Copyright (c) 2013-2016 Chukong Technologies Inc.
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2013-2015 Chukong Technologies Inc.
  
  http://www.cocos2d-x.org
 
@@ -99,7 +98,7 @@ FontCharMap::~FontCharMap()
 
 }
 
-int* FontCharMap::getHorizontalKerningForTextUTF32(const std::u32string& /*text*/, int & /*outNumLetters*/) const
+int* FontCharMap::getHorizontalKerningForTextUTF16(const std::u16string& text, int &outNumLetters) const
 {
     return nullptr;
 }

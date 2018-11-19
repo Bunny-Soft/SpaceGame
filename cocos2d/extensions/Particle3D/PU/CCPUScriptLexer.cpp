@@ -1,7 +1,6 @@
 /****************************************************************************
  Copyright (C) 2013 Henry van Merode. All rights reserved.
- Copyright (c) 2015-2016 Chukong Technologies Inc.
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2015 Chukong Technologies Inc.
  
  http://www.cocos2d-x.org
  
@@ -210,7 +209,7 @@ void PUScriptLexer::openLexer(const std::string &str,const std::string &source,P
         if(c == cr || (c == lf && lastc != cr))
             line++;
         
-        ++i;
+        i++;
     }
     
     // Check for valid exit states

@@ -1,6 +1,5 @@
 /****************************************************************************
-Copyright (c) 2015-2016 Chukong Technologies Inc.
-Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+Copyright (c) 2015 Chukong Technologies Inc.
 
 http://www.cocos2d-x.org
 
@@ -442,7 +441,7 @@ void BoneNode::updateColor()
     _transformUpdated = _transformDirty = _inverseDirty = _contentSizeDirty = true;
 }
 
-void BoneNode::updateDisplayedColor(const cocos2d::Color3B& /*parentColor*/)
+void BoneNode::updateDisplayedColor(const cocos2d::Color3B& parentColor)
 {
     if (_cascadeColorEnabled)
     {
@@ -453,7 +452,7 @@ void BoneNode::updateDisplayedColor(const cocos2d::Color3B& /*parentColor*/)
     }
 }
 
-void BoneNode::updateDisplayedOpacity(GLubyte /*parentOpacity*/)
+void BoneNode::updateDisplayedOpacity(GLubyte parentOpacity)
 {
     if (_cascadeOpacityEnabled)
     {
@@ -480,7 +479,7 @@ void BoneNode::disableCascadeColor()
     }
 }
 
-void BoneNode::onDraw(const cocos2d::Mat4 &transform, uint32_t /*flags*/)
+void BoneNode::onDraw(const cocos2d::Mat4 &transform, uint32_t flags)
 {
     getGLProgram()->use();
     getGLProgram()->setUniformsForBuiltins(transform);
@@ -573,7 +572,7 @@ bool BoneNode::isPointOnRack(const cocos2d::Vec2& bonePoint)
         if (_rackLength != 0.0f && _rackWidth != 0.0f)
         {
             float a1 = (_squareVertices[2].y - _squareVertices[3].y) / (_squareVertices[3].x - _squareVertices[0].x);
-            float a2 = (_squareVertices[2].y - _squareVertices[3].y) / (_squareVertices[0].x - _squareVertices[1].x);
+            float a2 = (_squareVertices[2].y - _squareVertices[3].y) / (_squareVertices[0].x - _squareVertices[1].x);;
             float b1 = a1 * _squareVertices[3].x;
             float y1 = bonePoint.y - _squareVertices[1].y;
             if (y1 >= a1 * bonePoint.x - b1 &&

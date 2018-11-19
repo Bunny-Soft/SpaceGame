@@ -1,6 +1,5 @@
 /****************************************************************************
- Copyright (c) 2014-2016 Chukong Technologies Inc.
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2014 Chukong Technologies Inc.
  
  http://www.cocos2d-x.org
  
@@ -184,7 +183,7 @@ inline bool BundleReader::read<char>(char *ptr)
 * specialization for std::string
 */
 template<>
-inline bool BundleReader::read<std::string>(std::string* /*ptr*/)
+inline bool BundleReader::read<std::string>(std::string *ptr)
 {
     CCLOG("can not read std::string, use readString() instead");
     return false;

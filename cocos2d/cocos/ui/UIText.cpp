@@ -1,6 +1,5 @@
 /****************************************************************************
-Copyright (c) 2013-2016 Chukong Technologies Inc.
-Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+Copyright (c) 2013-2014 Chukong Technologies Inc.
 
 http://www.cocos2d-x.org
 
@@ -405,21 +404,6 @@ Color4B Text::getEffectColor() const
     return Color4B(effect.r * 255, effect.g * 255, effect.b * 255, effect.a * 255);
 }
 
-Sprite * Text::getLetter(int lettetIndex)
-{
-    return _labelRenderer->getLetter(lettetIndex);
-}
-
-void Text::setBlendFunc(const BlendFunc &blendFunc)
-{
-    _labelRenderer->setBlendFunc(blendFunc);
-}
-
-const BlendFunc& Text::getBlendFunc() const
-{
-    return _labelRenderer->getBlendFunc();
-}
-    
 Widget* Text::createCloneInstance()
 {
     return Text::create();

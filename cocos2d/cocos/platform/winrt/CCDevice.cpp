@@ -1,7 +1,6 @@
 /****************************************************************************
 Copyright (c) 2010-2012 cocos2d-x.org
-Copyright (c) 2013-2016 Chukong Technologies Inc.
-Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+Copyright (c) 2013-2014 Chukong Technologies Inc.
 
 http://www.cocos2d-x.org
 
@@ -205,8 +204,9 @@ Data Device::getTextureDataForText(const char * text, const FontDefinition& text
     return ret;
 }
 
-void Device::setKeepScreenOn(bool /*value*/)
+void Device::setKeepScreenOn(bool value)
 {
+    CC_UNUSED_PARAM(value);
 }
 
 void Device::vibrate(float duration)
@@ -219,6 +219,8 @@ void Device::vibrate(float duration)
 
     VibrationDevice^ testVibrationDevice = VibrationDevice::GetDefault();
     testVibrationDevice->Vibrate(timespan);
+#else
+    CC_UNUSED_PARAM(duration);
 #endif // (WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP)
 }
 

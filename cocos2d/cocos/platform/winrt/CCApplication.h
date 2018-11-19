@@ -1,7 +1,6 @@
 /****************************************************************************
 Copyright (c) 2010-2013 cocos2d-x.org
 Copyright (c) Microsoft Open Technologies, Inc.
-Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
 http://www.cocos2d-x.org
 
@@ -56,11 +55,9 @@ public:
     static Application* getInstance();
 
     /* override functions */
-    virtual void setAnimationInterval(float interval) override;
-    virtual void setAnimationInterval(float interval, SetIntervalReason reason) override;
-
-    virtual LanguageType getCurrentLanguage() override;
-    virtual const char * getCurrentLanguageCode() override;
+    virtual void setAnimationInterval(float interval);
+    virtual LanguageType getCurrentLanguage();
+    virtual const char * getCurrentLanguageCode();
 
     /**
      @brief Get target platform

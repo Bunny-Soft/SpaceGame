@@ -1,7 +1,6 @@
 /****************************************************************************
  Copyright (C) 2013 Henry van Merode. All rights reserved.
- Copyright (c) 2015-2016 Chukong Technologies Inc.
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2015 Chukong Technologies Inc.
  
  http://www.cocos2d-x.org
  
@@ -58,7 +57,7 @@ orientation(ori)
 {
 }
 //-----------------------------------------------------------------------
-PUBillboardChain::PUBillboardChain(const std::string& /*name*/, const std::string &texFile, size_t maxElements,
+PUBillboardChain::PUBillboardChain(const std::string& name, const std::string &texFile, size_t maxElements,
                                size_t numberOfChains, bool useTextureCoords, bool useColours, bool dynamic)
                                :_maxElementsPerChain(maxElements),
                                _chainCount(numberOfChains),
@@ -580,7 +579,7 @@ void PUBillboardChain::updateVertexBuffer(const Mat4 &camMat)
     } // each segment
 
 
-    _vertexBuffer->updateVertices(&_vertices[0], (int)_vertices.size(), 0);
+    _vertexBuffer->updateVertices(&_vertices[0], (int)_vertices.size(), 0);;
     //pBuffer->unlock();
     //_vertexCameraUsed = cam;
     _vertexContentDirty = false;

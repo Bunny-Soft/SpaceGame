@@ -1,7 +1,6 @@
 /****************************************************************************
  Copyright (C) 2013 Henry van Merode. All rights reserved.
- Copyright (c) 2015-2016 Chukong Technologies Inc.
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2015 Chukong Technologies Inc.
  
  http://www.cocos2d-x.org
  
@@ -106,7 +105,7 @@ void PUForceFieldCalculationFactory::setWorldSize(const Vec3& worldSize)
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-void PURealTimeForceFieldCalculationFactory::generate(unsigned int /*forceFieldSize*/,
+void PURealTimeForceFieldCalculationFactory::generate(unsigned int forceFieldSize, 
                                                     unsigned short octaves, 
                                                     double frequency, 
                                                     double amplitude, 

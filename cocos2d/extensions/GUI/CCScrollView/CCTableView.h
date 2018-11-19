@@ -1,7 +1,6 @@
 /****************************************************************************
  Copyright (c) 2012 cocos2d-x.org
  Copyright (c) 2010 Sangwoo Im
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos2d-x.org
 
@@ -66,7 +65,7 @@ public:
      * @js NA
      * @lua NA
      */
-    virtual void tableCellHighlight(TableView* table, TableViewCell* cell);
+    virtual void tableCellHighlight(TableView* table, TableViewCell* cell){};
 
     /**
      * Delegate to respond a table cell release event
@@ -76,7 +75,7 @@ public:
      * @js NA
      * @lua NA
      */
-    virtual void tableCellUnhighlight(TableView* table, TableViewCell* cell);
+    virtual void tableCellUnhighlight(TableView* table, TableViewCell* cell){};
 
     /**
      * Delegate called when the cell is about to be recycled. Immediately
@@ -88,7 +87,7 @@ public:
      * @js NA
      * @lua NA
      */
-    virtual void tableCellWillRecycle(TableView* table, TableViewCell* cell);
+    virtual void tableCellWillRecycle(TableView* table, TableViewCell* cell){};
 
 };
 
@@ -111,14 +110,18 @@ public:
      * @param idx the index of a cell to get a size
      * @return size of a cell at given index
      */
-    virtual Size tableCellSizeForIndex(TableView* table, ssize_t idx);
+    virtual Size tableCellSizeForIndex(TableView *table, ssize_t idx) {
+        return cellSizeForTable(table);
+    };
     /**
      * cell height for a given table.
      *
      * @param table table to hold the instances of Class
      * @return cell size
      */
-    virtual Size cellSizeForTable(TableView* table);
+    virtual Size cellSizeForTable(TableView *table) {
+        return Size::ZERO;
+    };
     /**
      * a cell instance at a given index
      *
@@ -203,7 +206,6 @@ public:
      */
     TableViewDataSource* getDataSource() { return _dataSource; }
     /**
-     * @code
      * when this function bound to js or lua,the input params are changed
      * in js:var setDataSource(var jsSource)
      * in lua:local setDataSource()
