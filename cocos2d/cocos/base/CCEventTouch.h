@@ -1,6 +1,5 @@
 /****************************************************************************
- Copyright (c) 2013-2016 Chukong Technologies Inc.
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2013-2014 Chukong Technologies Inc.
  
  http://www.cocos2d-x.org
  
@@ -67,13 +66,13 @@ public:
      *
      * @return The code of the event.
      */
-    EventCode getEventCode() const { return _eventCode; }
+    inline EventCode getEventCode() const { return _eventCode; };
     
     /** Get the touches.
      *
      * @return The touches of the event.
      */
-    const std::vector<Touch*>& getTouches() const { return _touches; }
+    inline const std::vector<Touch*>& getTouches() const { return _touches; };
 
 #if TOUCH_PERF_DEBUG
     /** Set the event code.

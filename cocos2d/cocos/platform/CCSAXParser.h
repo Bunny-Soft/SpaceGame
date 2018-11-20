@@ -1,7 +1,6 @@
 /****************************************************************************
  Copyright (c) 2010 cocos2d-x.org
  Copyright (c) 2010 Максим Аксенов
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -58,7 +57,7 @@ public:
      * @js NA
      * @lua NA
      */
-    virtual void textHandler(void *ctx, const char *s, size_t len) = 0;
+    virtual void textHandler(void *ctx, const char *s, int len) = 0;
 };
 
 class CC_DLL SAXParser
@@ -90,12 +89,6 @@ public:
      * @lua NA
      */
     bool parse(const std::string& filename);
-
-    /**
-    * New API for performance.
-    */
-    bool parseIntrusive(char* xmlData, size_t dataLength);
-
     /**
      * @js NA
      * @lua NA
@@ -115,7 +108,7 @@ public:
      * @js NA
      * @lua NA
      */
-    static void textHandler(void *ctx, const CC_XML_CHAR *name, size_t len);
+    static void textHandler(void *ctx, const CC_XML_CHAR *name, int len);
 };
 
 // end of platform group

@@ -1,7 +1,6 @@
 /****************************************************************************
 Copyright (c) 2010-2012 cocos2d-x.org
-Copyright (c) 2013-2016 Chukong Technologies Inc.
-Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+Copyright (c) 2013-2015 Chukong Technologies Inc.
 
 http://www.cocos2d-x.org
 
@@ -92,7 +91,7 @@ namespace {
 }
 
 //default context attributions are set as follows
-GLContextAttrs GLView::_glContextAttrs = {8, 8, 8, 8, 24, 8, 0};
+GLContextAttrs GLView::_glContextAttrs = {5, 6, 5, 0, 16, 0};
 
 void GLView::setGLContextAttrs(GLContextAttrs& glContextAttrs)
 {
@@ -109,8 +108,6 @@ GLView::GLView()
 , _scaleY(1.0f)
 , _resolutionPolicy(ResolutionPolicy::UNKNOWN)
 , _vrImpl(nullptr)
-, _designResolutionSize(0,0)
-, _screenSize(0,0)
 {
 }
 
@@ -197,7 +194,7 @@ const Size& GLView::getDesignResolutionSize() const
     return _designResolutionSize;
 }
 
-Size GLView::getFrameSize() const
+const Size& GLView::getFrameSize() const
 {
     return _screenSize;
 }
@@ -205,11 +202,6 @@ Size GLView::getFrameSize() const
 void GLView::setFrameSize(float width, float height)
 {
     _screenSize = Size(width, height);
-
-    // Github issue #16003 and #16485
-    // only update the designResolution if it wasn't previously set
-    if (_designResolutionSize.equals(Size::ZERO))
-        _designResolutionSize = _screenSize;
 }
 
 Rect GLView::getVisibleRect() const
@@ -218,11 +210,6 @@ Rect GLView::getVisibleRect() const
     ret.size = getVisibleSize();
     ret.origin = getVisibleOrigin();
     return ret;
-}
-
-Rect GLView::getSafeAreaRect() const
-{
-    return getVisibleRect();
 }
 
 Size GLView::getVisibleSize() const
@@ -326,7 +313,7 @@ void GLView::handleTouchesBegin(int num, intptr_t ids[], float xs[], float ys[])
             
             CCLOGINFO("x = %f y = %f", touch->getLocationInView().x, touch->getLocationInView().y);
             
-            g_touchIdReorderMap.emplace(id, unusedIndex);
+            g_touchIdReorderMap.insert(std::make_pair(id, unusedIndex));
             touchEvent._touches.push_back(touch);
         }
     }
@@ -371,7 +358,7 @@ void GLView::handleTouchesMove(int num, intptr_t ids[], float xs[], float ys[], 
             continue;
         }
 
-        CCLOGINFO("Moving touches with id: %d, x=%f, y=%f, force=%f, maxFource=%f", (int)id, x, y, force, maxForce);
+        CCLOGINFO("Moving touches with id: %d, x=%f, y=%f, force=%f, maxFource=%f", id, x, y, force, maxForce);
         Touch* touch = g_touches[iter->second];
         if (touch)
         {
@@ -423,7 +410,7 @@ void GLView::handleTouchesOfEndOrCancel(EventTouch::EventCode eventCode, int num
         Touch* touch = g_touches[iter->second];
         if (touch)
         {
-            CCLOGINFO("Ending touches with id: %d, x=%f, y=%f", (int)id, x, y);
+            CCLOGINFO("Ending touches with id: %d, x=%f, y=%f", id, x, y);
             touch->setTouchInfo(iter->second, (x - _viewPortRect.origin.x) / _scaleX,
                                 (y - _viewPortRect.origin.y) / _scaleY);
 

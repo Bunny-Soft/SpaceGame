@@ -1,7 +1,6 @@
 /****************************************************************************
 Copyright (c) 2013 cocos2d-x.org
 Copyright (c) Microsoft Open Technologies, Inc.
-Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
 http://www.cocos2d-x.org
 
@@ -168,24 +167,6 @@ void UIEditBoxEvent::execute()
     {
         m_handler.Get()->Invoke(m_sender.Get(), m_text.Get());
     }
-}
-
-UIEditBoxEndEvent::UIEditBoxEndEvent(Platform::Object^ sender, Platform::String^ text, int action, Windows::Foundation::EventHandler<cocos2d::EndEventArgs^>^ handle)
-  : m_sender(sender)
-  , m_text(text)
-  , m_action(action)
-  , m_handler(handle)
-{
-
-}
-
-void UIEditBoxEndEvent::execute()
-{
-  if (m_handler.Get())
-  {
-    auto args = ref new EndEventArgs(m_action, m_text.Get());
-    m_handler.Get()->Invoke(m_sender.Get(), args);
-  }
 }
 
 NS_CC_END

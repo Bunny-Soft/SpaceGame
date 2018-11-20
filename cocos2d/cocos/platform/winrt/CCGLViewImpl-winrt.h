@@ -1,7 +1,6 @@
 /****************************************************************************
 Copyright (c) 2010 cocos2d-x.org
 Copyright (c) Microsoft Open Technologies, Inc.
-Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
 http://www.cocos2d-x.org
 
@@ -174,7 +173,7 @@ private:
 	bool m_windowClosed;
 	bool m_windowVisible;
     // PointerReleased for mouse not send button id, need save in PointerPressed last button
-    EventMouse::MouseButton _lastMouseButtonPressed;
+    MouseButton _lastMouseButtonPressed;
 
     bool m_running;
 	bool m_initialized;

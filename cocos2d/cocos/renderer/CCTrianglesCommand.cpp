@@ -1,6 +1,5 @@
 /****************************************************************************
- Copyright (c) 2013-2016 Chukong Technologies Inc.
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2013-2014 Chukong Technologies Inc.
  
  http://www.cocos2d-x.org
  
@@ -37,6 +36,7 @@ TrianglesCommand::TrianglesCommand()
 :_materialID(0)
 ,_textureID(0)
 ,_glProgramState(nullptr)
+,_glProgram(nullptr)
 ,_blendType(BlendFunc::DISABLE)
 ,_alphaTextureID(0)
 {
@@ -60,12 +60,14 @@ void TrianglesCommand::init(float globalOrder, GLuint textureID, GLProgramState*
     _mv = mv;
     
     if( _textureID != textureID || _blendType.src != blendType.src || _blendType.dst != blendType.dst ||
-       _glProgramState != glProgramState)
+       _glProgramState != glProgramState ||
+       _glProgram != glProgramState->getGLProgram())
     {
         _textureID = textureID;
         _blendType = blendType;
         _glProgramState = glProgramState;
-
+        _glProgram = glProgramState->getGLProgram();
+        
         generateMaterialID();
     }
 }
@@ -87,30 +89,18 @@ TrianglesCommand::~TrianglesCommand()
 
 void TrianglesCommand::generateMaterialID()
 {
-    // glProgramState is hashed because it contains:
-    //  *  uniforms/values
-    //  *  glProgram
-    //
-    // we safely can when the same glProgramState is being used then they share those states
-    // if they don't have the same glProgramState, they might still have the same
-    // uniforms/values and glProgram, but it would be too expensive to check the uniforms.
-    struct {
-        void* glProgramState;
-        GLuint textureId;
-        GLenum blendSrc;
-        GLenum blendDst;
-    } hashMe;
-
-    // NOTE: Initialize hashMe struct to make the value of padding bytes be filled with zero.
-    // It's important since XXH32 below will also consider the padding bytes which probably 
-    // are set to random values by different compilers.
-    memset(&hashMe, 0, sizeof(hashMe)); 
-
-    hashMe.textureId = _textureID;
-    hashMe.blendSrc = _blendType.src;
-    hashMe.blendDst = _blendType.dst;
-    hashMe.glProgramState = _glProgramState;
-    _materialID = XXH32((const void*)&hashMe, sizeof(hashMe), 0);
+    // do not batch if using custom uniforms (since we cannot batch) it
+    if(_glProgramState->getUniformCount() > 0)
+    {
+        _materialID = Renderer::MATERIAL_ID_DO_NOT_BATCH;
+        setSkipBatching(true);
+    }
+    else
+    {
+        int glProgram = (int)_glProgram->getProgram();
+        int intArray[4] = { glProgram, (int)_textureID, (int)_blendType.src, (int)_blendType.dst};
+        _materialID = XXH32((const void*)intArray, sizeof(intArray), 0);
+    }
 }
 
 void TrianglesCommand::useMaterial() const

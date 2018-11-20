@@ -1,6 +1,5 @@
 /****************************************************************************
  Copyright (c) 2014 cocos2d-x.org
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
  
  http://www.cocos2d-x.org
  
@@ -210,7 +209,7 @@ namespace cocostudio
                     }
                     else if (name == "Type")
                     {
-                        leftResourceType = getResourceType(value);
+                        leftResourceType = getResourceType(value);;
                     }
                     else if (name == "Plist")
                     {
@@ -241,7 +240,7 @@ namespace cocostudio
                     }
                     else if (name == "Type")
                     {
-                        rightResourceType = getResourceType(value);
+                        rightResourceType = getResourceType(value);;
                     }
                     else if (name == "Plist")
                     {
@@ -272,7 +271,7 @@ namespace cocostudio
                     }
                     else if (name == "Type")
                     {
-                        upResourceType = getResourceType(value);
+                        upResourceType = getResourceType(value);;
                     }
                     else if (name == "Plist")
                     {
@@ -303,7 +302,7 @@ namespace cocostudio
                     }
                     else if (name == "Type")
                     {
-                        downResourceType = getResourceType(value);
+                        downResourceType = getResourceType(value);;
                     }
                     else if (name == "Plist")
                     {
@@ -334,7 +333,7 @@ namespace cocostudio
                     }
                     else if (name == "Type")
                     {
-                        forwardResourceType = getResourceType(value);
+                        forwardResourceType = getResourceType(value);;
                     }
                     else if (name == "Plist")
                     {
@@ -365,7 +364,7 @@ namespace cocostudio
                     }
                     else if (name == "Type")
                     {
-                        backResourceType = getResourceType(value);
+                        backResourceType = getResourceType(value);;
                     }
                     else if (name == "Plist")
                     {

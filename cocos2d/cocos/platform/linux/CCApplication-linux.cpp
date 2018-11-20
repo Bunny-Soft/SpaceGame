@@ -1,7 +1,6 @@
 /****************************************************************************
 Copyright (c) 2011      Laschweinski
-Copyright (c) 2013-2016 Chukong Technologies Inc.
-Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+Copyright (c) 2013-2014 Chukong Technologies Inc.
 
 http://www.cocos2d-x.org
 
@@ -32,7 +31,6 @@ THE SOFTWARE.
 #include <sys/time.h>
 #include <string>
 #include "base/CCDirector.h"
-#include "base/ccUtils.h"
 #include "platform/CCFileUtils.h"
 
 NS_CC_BEGIN
@@ -46,7 +44,7 @@ static long getCurrentMillSecond() {
     struct timeval stCurrentTime;
 
     gettimeofday(&stCurrentTime,NULL);
-    lLastTime = stCurrentTime.tv_sec*1000+stCurrentTime.tv_usec*0.001; // milliseconds
+    lLastTime = stCurrentTime.tv_sec*1000+stCurrentTime.tv_usec*0.001; //millseconds
     return lLastTime;
 }
 
@@ -115,11 +113,6 @@ void Application::setAnimationInterval(float interval)
     _animationInterval = interval*1000.0f;
 }
 
-void Application::setAnimationInterval(float interval, SetIntervalReason reason)
-{
-    setAnimationInterval(interval);
-}
-
 void Application::setResourceRootPath(const std::string& rootResDir)
 {
     _resourceRootPath = rootResDir;
@@ -150,8 +143,8 @@ std::string Application::getVersion()
 
 bool Application::openURL(const std::string &url)
 {
-    std::string op = std::string("xdg-open '").append(url).append("'");
-    return system(op.c_str()) == 0;
+    std::string op = std::string("open ").append(url);
+    return system(op.c_str())!=-1;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -186,6 +179,7 @@ const char * Application::getCurrentLanguageCode()
 LanguageType Application::getCurrentLanguage()
 {
     char *pLanguageName = getenv("LANG");
+    LanguageType ret = LanguageType::ENGLISH;
     if (!pLanguageName)
     {
         return LanguageType::ENGLISH;
@@ -196,7 +190,84 @@ LanguageType Application::getCurrentLanguage()
         return LanguageType::ENGLISH;
     }
     
-    return utils::getLanguageTypeByISO2(pLanguageName);
+    if (0 == strcmp("zh", pLanguageName))
+    {
+        ret = LanguageType::CHINESE;
+    }
+    else if (0 == strcmp("en", pLanguageName))
+    {
+        ret = LanguageType::ENGLISH;
+    }
+    else if (0 == strcmp("fr", pLanguageName))
+    {
+        ret = LanguageType::FRENCH;
+    }
+    else if (0 == strcmp("it", pLanguageName))
+    {
+        ret = LanguageType::ITALIAN;
+    }
+    else if (0 == strcmp("de", pLanguageName))
+    {
+        ret = LanguageType::GERMAN;
+    }
+    else if (0 == strcmp("es", pLanguageName))
+    {
+        ret = LanguageType::SPANISH;
+    }
+    else if (0 == strcmp("nl", pLanguageName))
+    {
+        ret = LanguageType::DUTCH;
+    }
+    else if (0 == strcmp("ru", pLanguageName))
+    {
+        ret = LanguageType::RUSSIAN;
+    }
+    else if (0 == strcmp("ko", pLanguageName))
+    {
+        ret = LanguageType::KOREAN;
+    }
+    else if (0 == strcmp("ja", pLanguageName))
+    {
+        ret = LanguageType::JAPANESE;
+    }
+    else if (0 == strcmp("hu", pLanguageName))
+    {
+        ret = LanguageType::HUNGARIAN;
+    }
+    else if (0 == strcmp("pt", pLanguageName))
+    {
+        ret = LanguageType::PORTUGUESE;
+    }
+    else if (0 == strcmp("ar", pLanguageName))
+    {
+        ret = LanguageType::ARABIC;
+    }
+    else if (0 == strcmp("nb", pLanguageName))
+    {
+        ret = LanguageType::NORWEGIAN;
+    }
+    else if (0 == strcmp("pl", pLanguageName))
+    {
+        ret = LanguageType::POLISH;
+    }
+    else if (0 == strcmp("tr", pLanguageName))
+    {
+        ret = LanguageType::TURKISH;
+    }
+    else if (0 == strcmp("uk", pLanguageName))
+    {
+        ret = LanguageType::UKRAINIAN;
+    }
+    else if (0 == strcmp("ro", pLanguageName))
+    {
+        ret = LanguageType::ROMANIAN;
+    }
+    else if (0 == strcmp("bg", pLanguageName))
+    {
+        ret = LanguageType::BULGARIAN;
+    }
+    
+    return ret;
 }
 
 NS_CC_END

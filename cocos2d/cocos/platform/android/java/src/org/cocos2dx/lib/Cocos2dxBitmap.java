@@ -1,7 +1,6 @@
 /****************************************************************************
 Copyright (c) 2010-2012 cocos2d-x.org
-Copyright (c) 2013-2016 Chukong Technologies Inc.
-Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+Copyright (c) 2013-2015 Chukong Technologies Inc.
 
 http://www.cocos2d-x.org
 
@@ -92,14 +91,8 @@ public final class Cocos2dxBitmap {
         int length = text.length();
 
         while(index < length) {
-            final int charsToAdvance = paint.breakText(text, index, length, true, maxWidth, null);
-            if(charsToAdvance == 0) {
-                index++;
-            }
-            else {
-                index += charsToAdvance;
-                lineCount++;
-            }
+            index += paint.breakText(text, index, length, true, maxWidth, null);
+            lineCount++;
         }
 
         float actualHeight = (Math.abs(paint.ascent()) + Math.abs(paint.descent()));

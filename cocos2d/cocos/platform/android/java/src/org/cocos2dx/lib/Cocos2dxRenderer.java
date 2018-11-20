@@ -1,6 +1,5 @@
 /****************************************************************************
 Copyright (c) 2010-2011 cocos2d-x.org
-Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
 http://www.cocos2d-x.org
 
@@ -34,10 +33,9 @@ public class Cocos2dxRenderer implements GLSurfaceView.Renderer {
     // ===========================================================
 
     private final static long NANOSECONDSPERSECOND = 1000000000L;
-    private final static long NANOSECONDSPERMICROSECOND = 1000000L;
+    private final static long NANOSECONDSPERMICROSECOND = 1000000;
 
-    // The final animation interval which is used in 'onDrawFrame'
-    private static long sAnimationInterval = (long) (1.0f / 60f * Cocos2dxRenderer.NANOSECONDSPERSECOND);
+    private static long sAnimationInterval = (long) (1.0 / 60 * Cocos2dxRenderer.NANOSECONDSPERSECOND);
 
     // ===========================================================
     // Fields
@@ -56,8 +54,8 @@ public class Cocos2dxRenderer implements GLSurfaceView.Renderer {
     // Getter & Setter
     // ===========================================================
 
-    public static void setAnimationInterval(float interval) {
-        sAnimationInterval = (long) (interval * Cocos2dxRenderer.NANOSECONDSPERSECOND);
+    public static void setAnimationInterval(final float animationInterval) {
+        Cocos2dxRenderer.sAnimationInterval = (long) (animationInterval * Cocos2dxRenderer.NANOSECONDSPERSECOND);
     }
 
     public void setScreenWidthAndHeight(final int surfaceWidth, final int surfaceHeight) {
@@ -87,8 +85,7 @@ public class Cocos2dxRenderer implements GLSurfaceView.Renderer {
          * No need to use algorithm in default(60 FPS) situation,
          * since onDrawFrame() was called by system 60 times per second by default.
          */
-
-        if (Cocos2dxRenderer.sAnimationInterval <= 1.0f / 60f * Cocos2dxRenderer.NANOSECONDSPERSECOND) {
+        if (sAnimationInterval <= 1.0 / 60 * Cocos2dxRenderer.NANOSECONDSPERSECOND) {
             Cocos2dxRenderer.nativeRender();
         } else {
             final long now = System.nanoTime();

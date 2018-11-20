@@ -1,6 +1,5 @@
 ﻿/****************************************************************************
-Copyright (c) 2013-2016 Chukong Technologies Inc.
-Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+Copyright (c) 2013-2014 Chukong Technologies Inc.
 
 http://www.cocos2d-x.org
 
@@ -117,7 +116,7 @@ public:
     virtual void start() override;
     // stop the effect sound which started with latest start()
     virtual void stop() override;
-    /// @} end of PlayableProtocol
+    /// @} end of PlaybleProtocol
 
 private:
     std::string _filePath;

@@ -1,8 +1,7 @@
 /*
  * Copyright (c) 2012      Pierre-David Bélanger
  * Copyright (c) 2012      cocos2d-x.org
- * Copyright (c) 2013-2016 Chukong Technologies Inc.
- * Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+ * Copyright (c) 2013-2014 Chukong Technologies Inc.
  *
  * http://www.cocos2d-x.org
  *
@@ -157,7 +156,6 @@ CC_CONSTRUCTOR_ACCESS:
 
 protected:
     Node* _stencil;
-    GLProgram* _originStencilProgram;
    
     StencilStateManager* _stencilStateManager;
     

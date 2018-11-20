@@ -1,7 +1,6 @@
 /****************************************************************************
  Copyright (C) 2013 Henry van Merode. All rights reserved.
- Copyright (c) 2015-2016 Chukong Technologies Inc.
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2015 Chukong Technologies Inc.
  
  http://www.cocos2d-x.org
  
@@ -44,7 +43,7 @@ enum PUInterpolationType
 */
 struct PUControlPointSorter
 {
-    bool operator() (const Vec2& a, const Vec2& b)
+    inline bool operator() (const Vec2& a, const Vec2& b)
     {
         return a.x < b.x;
     }

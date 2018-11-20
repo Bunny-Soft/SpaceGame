@@ -3,7 +3,6 @@ Copyright (c) 2008-2010 Ricardo Quesada
 Copyright (c) 2011      Zynga Inc.
 Copyright (c) 2010-2012 cocos2d-x.org
 Copyright (c) 2013-2016 Chukong Technologies Inc.
-Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
 http://www.cocos2d-x.org
 
@@ -74,7 +73,7 @@ public:
      *
      * @return The seconds had elapsed since the actions started to run.
      */
-    float getElapsed() { return _elapsed; }
+    inline float getElapsed(void) { return _elapsed; }
 
     /** Sets the amplitude rate, extension in GridAction
      *
@@ -86,12 +85,12 @@ public:
      *
      * @return  The amplitude rate.
      */
-    float getAmplitudeRate();
+    float getAmplitudeRate(void);
 
     //
     // Overrides
     //
-    virtual bool isDone() const override;
+    virtual bool isDone(void) const override;
     /**
      * @param dt in seconds
      */
@@ -115,9 +114,8 @@ CC_CONSTRUCTOR_ACCESS:
 
 protected:
     float _elapsed;
-    bool _firstTick;
-    bool _done;
-    
+    bool   _firstTick;
+
 protected:
     bool sendUpdateEventToScript(float dt, Action *actionObject);
 };
@@ -185,8 +183,7 @@ public:
     virtual Sequence* clone() const override;
     virtual Sequence* reverse() const override;
     virtual void startWithTarget(Node *target) override;
-    virtual void stop() override;
-    virtual bool isDone() const override;
+    virtual void stop(void) override;
     /**
      * @param t In seconds.
      */
@@ -228,7 +225,7 @@ public:
      *
      * @param action The inner action.
      */
-    void setInnerAction(FiniteTimeAction *action)
+    inline void setInnerAction(FiniteTimeAction *action)
     {
         if (_innerAction != action)
         {
@@ -242,7 +239,7 @@ public:
      *
      * @return The inner action.
      */
-    FiniteTimeAction* getInnerAction()
+    inline FiniteTimeAction* getInnerAction()
     {
         return _innerAction;
     }
@@ -298,7 +295,7 @@ public:
      *
      * @param action The inner action.
      */
-    void setInnerAction(ActionInterval *action)
+    inline void setInnerAction(ActionInterval *action)
     {
         if (_innerAction != action)
         {
@@ -312,7 +309,7 @@ public:
      *
      * @return The inner action.
      */
-    ActionInterval* getInnerAction()
+    inline ActionInterval* getInnerAction()
     {
         return _innerAction;
     }
@@ -410,9 +407,9 @@ public:
     // Overrides
     //
     virtual Spawn* clone() const override;
-    virtual Spawn* reverse() const override;
+    virtual Spawn* reverse(void) const override;
     virtual void startWithTarget(Node *target) override;
-    virtual void stop() override;
+    virtual void stop(void) override;
     /**
      * @param time In seconds.
      */
@@ -548,7 +545,7 @@ public:
     // Override
     //
     virtual RotateBy* clone() const override;
-    virtual RotateBy* reverse() const override;
+    virtual RotateBy* reverse(void) const override;
     virtual void startWithTarget(Node *target) override;
     /**
      * @param time In seconds.
@@ -609,7 +606,7 @@ public:
     // Overrides
     //
     virtual MoveBy* clone() const override;
-    virtual MoveBy* reverse() const  override;
+    virtual MoveBy* reverse(void) const  override;
     virtual void startWithTarget(Node *target) override;
     /**
      * @param time in seconds
@@ -707,7 +704,7 @@ public:
     // Overrides
     //
     virtual SkewTo* clone() const override;
-    virtual SkewTo* reverse() const override;
+    virtual SkewTo* reverse(void) const override;
     virtual void startWithTarget(Node *target) override;
     /**
      * @param time In seconds.
@@ -757,7 +754,7 @@ public:
     //
     virtual void startWithTarget(Node *target) override;
     virtual SkewBy* clone() const  override;
-    virtual SkewBy* reverse() const override;
+    virtual SkewBy* reverse(void) const override;
     
 CC_CONSTRUCTOR_ACCESS:
     SkewBy() {}
@@ -770,92 +767,6 @@ CC_CONSTRUCTOR_ACCESS:
 private:
     CC_DISALLOW_COPY_AND_ASSIGN(SkewBy);
 };
-
-/** @class ResizeTo
-* @brief Resize a Node object to the final size by modifying it's Size attribute.
-*/
-class  CC_DLL ResizeTo : public ActionInterval 
-{
-public:
-    /**
-    * Creates the action.
-    * @brief Resize a Node object to the final size by modifying it's Size attribute. Works on all nodes where setContentSize is effective. But it's mostly useful for nodes where 9-slice is enabled
-    * @param duration Duration time, in seconds.
-    * @param final_size The target size to reach
-    * @return An autoreleased RotateTo object.
-    */
-    static ResizeTo* create(float duration, const cocos2d::Size& final_size);
-
-    //
-    // Overrides
-    //
-    virtual ResizeTo* clone() const override;
-    void startWithTarget(cocos2d::Node* target) override;
-    void update(float time) override;
-
-CC_CONSTRUCTOR_ACCESS:
-    ResizeTo() {}
-    virtual ~ResizeTo() {}
-    
-    /**
-    * initializes the action
-    * @param duration in seconds
-    * @param final_size in Size type
-    */
-    bool initWithDuration(float duration, const cocos2d::Size& final_size);
-
-protected:
-    cocos2d::Size _initialSize;
-    cocos2d::Size _finalSize;
-    cocos2d::Size _sizeDelta;
-
-private:
-    CC_DISALLOW_COPY_AND_ASSIGN(ResizeTo);
-};
-
-
-/** @class ResizeBy
-* @brief Resize a Node object by a Size. Works on all nodes where setContentSize is effective. But it's mostly useful for nodes where 9-slice is enabled
-*/
-class CC_DLL ResizeBy : public ActionInterval 
-{
-public:
-    /**
-    * Creates the action.
-    *
-    * @param duration Duration time, in seconds.
-    * @param deltaSize The delta size.
-    * @return An autoreleased ResizeBy object.
-    */
-    static ResizeBy* create(float duration, const cocos2d::Size& deltaSize);
-    
-    //
-    // Overrides
-    //
-    virtual ResizeBy* clone() const override;
-    virtual ResizeBy* reverse() const  override;
-    virtual void startWithTarget(Node *target) override;
-    /**
-    * @param time in seconds
-    */
-    virtual void update(float time) override;
-
-CC_CONSTRUCTOR_ACCESS:
-    ResizeBy() {}
-    virtual ~ResizeBy() {}
-    
-    /** initializes the action */
-    bool initWithDuration(float duration, const cocos2d::Size& deltaSize);
-
-protected:
-    cocos2d::Size _sizeDelta;
-    cocos2d::Size _startSize;
-    cocos2d::Size _previousSize;
-
-private:
-    CC_DISALLOW_COPY_AND_ASSIGN(ResizeBy);
-};
-
 
 /** @class JumpBy
  * @brief Moves a Node object simulating a parabolic jump movement by modifying it's position attribute.
@@ -877,7 +788,7 @@ public:
     // Overrides
     //
     virtual JumpBy* clone() const override;
-    virtual JumpBy* reverse() const override;
+    virtual JumpBy* reverse(void) const override;
     virtual void startWithTarget(Node *target) override;
     /**
      * @param time In seconds.
@@ -926,7 +837,7 @@ public:
     //
     virtual void startWithTarget(Node *target) override;
     virtual JumpTo* clone() const override;
-    virtual JumpTo* reverse() const override;
+    virtual JumpTo* reverse(void) const override;
 
 CC_CONSTRUCTOR_ACCESS:
     JumpTo() {}
@@ -978,7 +889,7 @@ public:
     // Overrides
     //
     virtual BezierBy* clone() const override;
-    virtual BezierBy* reverse() const override;
+    virtual BezierBy* reverse(void) const override;
     virtual void startWithTarget(Node *target) override;
     /**
      * @param time In seconds.
@@ -1028,7 +939,7 @@ public:
     //
     virtual void startWithTarget(Node *target) override;
     virtual BezierTo* clone() const override;
-    virtual BezierTo* reverse() const override;
+    virtual BezierTo* reverse(void) const override;
     
 CC_CONSTRUCTOR_ACCESS:
     BezierTo() {}
@@ -1084,7 +995,7 @@ public:
     // Overrides
     //
     virtual ScaleTo* clone() const override;
-    virtual ScaleTo* reverse() const override;
+    virtual ScaleTo* reverse(void) const override;
     virtual void startWithTarget(Node *target) override;
     /**
      * @param time In seconds.
@@ -1168,7 +1079,7 @@ public:
     //
     virtual void startWithTarget(Node *target) override;
     virtual ScaleBy* clone() const override;
-    virtual ScaleBy* reverse() const override;
+    virtual ScaleBy* reverse(void) const override;
 
 CC_CONSTRUCTOR_ACCESS:
     ScaleBy() {}
@@ -1242,7 +1153,7 @@ public:
     // Overrides
     //
     virtual FadeTo* clone() const override;
-    virtual FadeTo* reverse() const override;
+    virtual FadeTo* reverse(void) const override;
     virtual void startWithTarget(Node *target) override;
     /**
      * @param time In seconds.
@@ -1287,7 +1198,7 @@ public:
     //
     virtual void startWithTarget(Node *target) override;
     virtual FadeIn* clone() const override;
-    virtual FadeTo* reverse() const override;
+    virtual FadeTo* reverse(void) const override;
 
     /**
      * @js NA
@@ -1321,7 +1232,7 @@ public:
     //
     virtual void startWithTarget(Node *target) override;
     virtual FadeOut* clone() const  override;
-    virtual FadeTo* reverse() const override;
+    virtual FadeTo* reverse(void) const override;
 
     /**
      * @js NA
@@ -1365,7 +1276,7 @@ public:
     // Overrides
     //
     virtual TintTo* clone() const override;
-    virtual TintTo* reverse() const override;
+    virtual TintTo* reverse(void) const override;
     virtual void startWithTarget(Node *target) override;
     /**
      * @param time In seconds.
@@ -1490,7 +1401,7 @@ public:
     virtual ReverseTime* reverse() const override;
     virtual ReverseTime* clone() const override;
     virtual void startWithTarget(Node *target) override;
-    virtual void stop() override;
+    virtual void stop(void) override;
     /**
      * @param time In seconds.
      */
@@ -1498,7 +1409,7 @@ public:
     
 CC_CONSTRUCTOR_ACCESS:
     ReverseTime();
-    virtual ~ReverseTime();
+    virtual ~ReverseTime(void);
 
     /** initializes the action */
     bool initWithAction(FiniteTimeAction *action);
@@ -1547,7 +1458,7 @@ public:
     virtual Animate* clone() const override;
     virtual Animate* reverse() const override;
     virtual void startWithTarget(Node *target) override;
-    virtual void stop() override;
+    virtual void stop(void) override;
     /**
      * @param t In seconds.
      */
@@ -1607,7 +1518,7 @@ public:
     virtual TargetedAction* clone() const override;
     virtual TargetedAction* reverse() const  override;
     virtual void startWithTarget(Node *target) override;
-    virtual void stop() override;
+    virtual void stop(void) override;
     /**
      * @param time In seconds.
      */

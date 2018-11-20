@@ -1,6 +1,5 @@
 /****************************************************************************
- Copyright (c) 2014-2016 Chukong Technologies Inc.
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2014 Chukong Technologies Inc.
 
  http://www.cocos2d-x.org
 
@@ -42,7 +41,6 @@
 #include "base/CCDirector.h"
 #include "base/CCEventKeyboard.h"
 #include "base/CCEventDispatcher.h"
-#include "base/ccUtils.h"
 #include "platform/CCFileUtils.h"
 
 #ifdef  LOG_TAG
@@ -121,7 +119,6 @@ Application::Application()
 : _win(nullptr)
 , _conform(nullptr)
 , _animationInterval(1.0f/60.0f*1000.0f)
-, _paused(false)
 {
     _orientation = APP_DEVICE_ORIENTATION_0;
     CC_ASSERT(! __instance);
@@ -434,7 +431,6 @@ static void app_pause(void *data)
     app->applicationDidEnterBackground();
 
     ecore_animator_freeze(app->_ani);
-    app->setPauseFlag(true);
 }
 
 static void app_resume(void *data)
@@ -450,7 +446,6 @@ static void app_resume(void *data)
     resumeAccelerometerSensor();
 
     ecore_animator_thaw(app->_ani);
-    app->setPauseFlag(false);
 }
 
 static void app_terminate(void *data)
@@ -500,11 +495,6 @@ void Application::setAnimationInterval(float interval)
 {
     _animationInterval = interval*1000.0f;
     ecore_animator_frametime_set(interval);
-}
-
-void Application::setAnimationInterval(float interval, SetIntervalReason reason)
-{
-    setAnimationInterval(interval);
 }
 
 void Application::setResourceRootPath(const std::string& rootResDir)
@@ -605,6 +595,7 @@ std::string Application::getVersion()
 LanguageType Application::getCurrentLanguage()
 {
     char *pLanguageName = getenv("LANG");
+    LanguageType ret = LanguageType::ENGLISH;
     if (!pLanguageName)
     {
         return LanguageType::ENGLISH;
@@ -615,7 +606,68 @@ LanguageType Application::getCurrentLanguage()
         return LanguageType::ENGLISH;
     }
     
-    return utils::getLanguageTypeByISO2(pLanguageName);
+    if (0 == strcmp("zh", pLanguageName))
+    {
+        ret = LanguageType::CHINESE;
+    }
+    else if (0 == strcmp("en", pLanguageName))
+    {
+        ret = LanguageType::ENGLISH;
+    }
+    else if (0 == strcmp("fr", pLanguageName))
+    {
+        ret = LanguageType::FRENCH;
+    }
+    else if (0 == strcmp("it", pLanguageName))
+    {
+        ret = LanguageType::ITALIAN;
+    }
+    else if (0 == strcmp("de", pLanguageName))
+    {
+        ret = LanguageType::GERMAN;
+    }
+    else if (0 == strcmp("es", pLanguageName))
+    {
+        ret = LanguageType::SPANISH;
+    }
+    else if (0 == strcmp("nl", pLanguageName))
+    {
+        ret = LanguageType::DUTCH;
+    }
+    else if (0 == strcmp("ru", pLanguageName))
+    {
+        ret = LanguageType::RUSSIAN;
+    }
+    else if (0 == strcmp("ko", pLanguageName))
+    {
+        ret = LanguageType::KOREAN;
+    }
+    else if (0 == strcmp("ja", pLanguageName))
+    {
+        ret = LanguageType::JAPANESE;
+    }
+    else if (0 == strcmp("hu", pLanguageName))
+    {
+        ret = LanguageType::HUNGARIAN;
+    }
+    else if (0 == strcmp("pt", pLanguageName))
+    {
+        ret = LanguageType::PORTUGUESE;
+    }
+    else if (0 == strcmp("ar", pLanguageName))
+    {
+        ret = LanguageType::ARABIC;
+    }
+    else if (0 == strcmp("nb", pLanguageName))
+    {
+        ret = LanguageType::NORWEGIAN;
+    }
+    else if (0 == strcmp("pl", pLanguageName))
+    {
+        ret = LanguageType::POLISH;
+    }
+    
+    return ret;
 }
 
 NS_CC_END

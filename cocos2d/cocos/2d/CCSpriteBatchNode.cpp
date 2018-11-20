@@ -3,8 +3,7 @@ Copyright (c) 2009-2010 Ricardo Quesada
 Copyright (c) 2009      Matt Oswald
 Copyright (c) 2010-2012 cocos2d-x.org
 Copyright (c) 2011      Zynga Inc.
-Copyright (c) 2013-2016 Chukong Technologies Inc.
-Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+Copyright (c) 2013-2014 Chukong Technologies Inc.
 
 http://www.cocos2d-x.org
 
@@ -405,19 +404,6 @@ void SpriteBatchNode::increaseAtlasCapacity()
     }
 }
 
-void SpriteBatchNode::reserveCapacity(ssize_t newCapacity)
-{
-    if (newCapacity <= _textureAtlas->getCapacity())
-        return;
-
-    if (! _textureAtlas->resizeCapacity(newCapacity))
-    {
-        // serious problems
-        CCLOGWARN("cocos2d: WARNING: Not enough memory to resize the atlas");
-        CCASSERT(false, "Not enough memory to resize the atlas");
-    }
-}
-
 ssize_t SpriteBatchNode::rebuildIndexInOrder(Sprite *parent, ssize_t index)
 {
     CCASSERT(index>=0 && index < _children.size(), "Invalid index");
@@ -453,7 +439,7 @@ ssize_t SpriteBatchNode::highestAtlasIndexInChild(Sprite *sprite)
 {
     auto& children = sprite->getChildren();
 
-    if (children.empty())
+    if (children.size() == 0)
     {
         return sprite->getAtlasIndex();
     }
@@ -588,7 +574,7 @@ void SpriteBatchNode::removeSpriteFromAtlas(Sprite *sprite)
         auto next = std::next(it);
 
         Sprite *spr = nullptr;
-        for(auto nextEnd = _descendants.end(); next != nextEnd; ++next) {
+        for(; next != _descendants.end(); ++next) {
             spr = *next;
             spr->setAtlasIndex( spr->getAtlasIndex() - 1 );
         }
@@ -705,7 +691,7 @@ SpriteBatchNode * SpriteBatchNode::addSpriteWithoutQuad(Sprite*child, int z, int
 
     // FIXME:: optimize with a binary search
     auto it = _descendants.begin();
-    for (auto itEnd = _descendants.end(); it != itEnd; ++it)
+    for (; it != _descendants.end(); ++it)
     {
         if((*it)->getAtlasIndex() >= z)
             break;

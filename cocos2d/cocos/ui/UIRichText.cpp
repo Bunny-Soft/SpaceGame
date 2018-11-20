@@ -1,6 +1,5 @@
 /****************************************************************************
  Copyright (c) 2013 cocos2d-x.org
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
  
  http://www.cocos2d-x.org
  
@@ -28,8 +27,8 @@
 #include <sstream>
 #include <vector>
 #include <locale>
-#include <algorithm>
 
+#include "tinyxml2.h"
 #include "platform/CCFileUtils.h"
 #include "platform/CCApplication.h"
 #include "base/CCEventListenerTouch.h"
@@ -39,8 +38,6 @@
 #include "2d/CCSprite.h"
 #include "base/ccUTF8.h"
 #include "ui/UIHelper.h"
-
-#include "platform/CCSAXParser.h"
 
 USING_NS_CC;
 using namespace cocos2d::ui;
@@ -77,7 +74,7 @@ public:
         _touchListener->release();
     }
 
-    void onTouchesEnded(const std::vector<Touch*>& touches, Event* /*event*/)
+    void onTouchesEnded(const std::vector<Touch*>& touches, Event *event)
     {
         for (const auto& touch: touches)
         {
@@ -164,10 +161,10 @@ bool RichElementText::init(int tag, const Color3B &color, GLubyte opacity, const
     return false;
 }
 
-RichElementImage* RichElementImage::create(int tag, const Color3B &color, GLubyte opacity, const std::string& filePath, const std::string& url, Widget::TextureResType texType)
+RichElementImage* RichElementImage::create(int tag, const Color3B &color, GLubyte opacity, const std::string& filePath, const std::string& url)
 {
     RichElementImage* element = new (std::nothrow) RichElementImage();
-    if (element && element->init(tag, color, opacity, filePath, url, texType))
+    if (element && element->init(tag, color, opacity, filePath, url))
     {
         element->autorelease();
         return element;
@@ -176,7 +173,7 @@ RichElementImage* RichElementImage::create(int tag, const Color3B &color, GLubyt
     return nullptr;
 }
     
-bool RichElementImage::init(int tag, const Color3B &color, GLubyte opacity, const std::string& filePath, const std::string& url, Widget::TextureResType texType)
+bool RichElementImage::init(int tag, const Color3B &color, GLubyte opacity, const std::string& filePath, const std::string& url)
 {
     if (RichElement::init(tag, color, opacity))
     {
@@ -184,7 +181,6 @@ bool RichElementImage::init(int tag, const Color3B &color, GLubyte opacity, cons
         _width = -1;
         _height = -1;
         _url = url;
-        _textureType = texType;
         return true;
     }
     return false;
@@ -241,7 +237,7 @@ RichElementNewLine* RichElementNewLine::create(int tag, const Color3B& color, GL
 }
 
 /** @brief parse a XML. */
-class MyXMLVisitor : public SAXDelegator
+class MyXMLVisitor: public tinyxml2::XMLVisitor
 {
 public:
     /** @brief underline or strikethrough */
@@ -284,11 +280,11 @@ public:
             hasColor = true;
         }
         Attributes()
-        : fontSize(-1)
-        , hasColor(false)
-        , bold(false)
+        : bold(false)
         , italics(false)
         , line(StyleLine::NONE)
+        , hasColor(false)
+        , fontSize(-1)
         , effect(StyleEffect::NONE)
         {
         }
@@ -333,12 +329,14 @@ public:
     
     std::tuple<bool, Color3B> getGlow() const;
     
-    void startElement(void *ctx, const char *name, const char **atts) override;
-
-    void endElement(void *ctx, const char *name) override;
-
-    void textHandler(void *ctx, const char *s, size_t len) override;
-
+    /// Visit an element.
+    virtual bool VisitEnter( const tinyxml2::XMLElement& element, const tinyxml2::XMLAttribute* firstAttribute );
+    
+    /// Visit an element.
+    virtual bool VisitExit( const tinyxml2::XMLElement& element );
+    
+    /// Visit a text node.
+    virtual bool Visit(const tinyxml2::XMLText& text);
     
     void pushBackFontElement(const Attributes& attribs);
     
@@ -351,14 +349,14 @@ public:
     static void removeTagDescription(const std::string& tag);
     
 private:
-    ValueMap tagAttrMapWithXMLElement(const char ** attrs);
+    ValueMap tagAttrMapWithXMLElement(const tinyxml2::XMLElement& element);
 };
 
 MyXMLVisitor::TagTables MyXMLVisitor::_tagTables;
 
 MyXMLVisitor::MyXMLVisitor(RichText* richText)
-:  _fontElements(20)
-, _richText(richText)
+: _richText(richText)
+, _fontElements(20)
 {
     MyXMLVisitor::setTagDescription("font", true, [](const ValueMap& tagAttrValueMap) {
         // supported attributes:
@@ -378,41 +376,41 @@ MyXMLVisitor::MyXMLVisitor(RichText* richText)
         return make_pair(attrValueMap, nullptr);
     });
     
-    MyXMLVisitor::setTagDescription("b", true, [](const ValueMap& /*tagAttrValueMap*/) {
+    MyXMLVisitor::setTagDescription("b", true, [](const ValueMap& tagAttrValueMap) {
         // no supported attributes
         ValueMap attrValueMap;
         attrValueMap[RichText::KEY_TEXT_BOLD] = true;
         return make_pair(attrValueMap, nullptr);
     });
     
-    MyXMLVisitor::setTagDescription("i", true, [](const ValueMap& /*tagAttrValueMap*/) {
+    MyXMLVisitor::setTagDescription("i", true, [](const ValueMap& tagAttrValueMap) {
         // no supported attributes
         ValueMap attrValueMap;
         attrValueMap[RichText::KEY_TEXT_ITALIC] = true;
         return make_pair(attrValueMap, nullptr);
     });
     
-    MyXMLVisitor::setTagDescription("del", true, [](const ValueMap& /*tagAttrValueMap*/) {
+    MyXMLVisitor::setTagDescription("del", true, [](const ValueMap& tagAttrValueMap) {
         // no supported attributes
         ValueMap attrValueMap;
         attrValueMap[RichText::KEY_TEXT_LINE] = RichText::VALUE_TEXT_LINE_DEL;
         return make_pair(attrValueMap, nullptr);
     });
     
-    MyXMLVisitor::setTagDescription("u", true, [](const ValueMap& /*tagAttrValueMap*/) {
+    MyXMLVisitor::setTagDescription("u", true, [](const ValueMap& tagAttrValueMap) {
         // no supported attributes
         ValueMap attrValueMap;
         attrValueMap[RichText::KEY_TEXT_LINE] = RichText::VALUE_TEXT_LINE_UNDER;
         return make_pair(attrValueMap, nullptr);
     });
     
-    MyXMLVisitor::setTagDescription("small", true, [](const ValueMap& /*tagAttrValueMap*/) {
+    MyXMLVisitor::setTagDescription("small", true, [](const ValueMap& tagAttrValueMap) {
         ValueMap attrValueMap;
         attrValueMap[RichText::KEY_FONT_SMALL] = true;
         return make_pair(attrValueMap, nullptr);
     });
     
-    MyXMLVisitor::setTagDescription("big", true, [](const ValueMap& /*tagAttrValueMap*/) {
+    MyXMLVisitor::setTagDescription("big", true, [](const ValueMap& tagAttrValueMap) {
         ValueMap attrValueMap;
         attrValueMap[RichText::KEY_FONT_BIG] = true;
         return make_pair(attrValueMap, nullptr);
@@ -424,7 +422,6 @@ MyXMLVisitor::MyXMLVisitor(RichText* richText)
         std::string src;
         int height = -1;
         int width = -1;
-        Widget::TextureResType resType = Widget::TextureResType::LOCAL;
         
         if (tagAttrValueMap.find("src") != tagAttrValueMap.end()) {
             src = tagAttrValueMap.at("src").asString();
@@ -435,17 +432,10 @@ MyXMLVisitor::MyXMLVisitor(RichText* richText)
         if (tagAttrValueMap.find("width") != tagAttrValueMap.end()) {
             width = tagAttrValueMap.at("width").asInt();
         }
-        if (tagAttrValueMap.find("type") != tagAttrValueMap.end()) {
-            // texture type
-            // 0: normal file path
-            // 1: sprite frame name
-            int type = tagAttrValueMap.at("type").asInt();
-            resType = type == 0 ? Widget::TextureResType::LOCAL : Widget::TextureResType::PLIST;
-        }
         
         RichElementImage* elementImg = nullptr;
         if (src.length()) {
-            elementImg = RichElementImage::create(0, Color3B::WHITE, 255, src, "", resType);
+            elementImg = RichElementImage::create(0, Color3B::WHITE, 255, src);
             if (0 <= height) elementImg->setHeight(height);
             if (0 <= width)  elementImg->setWidth(width);
         }
@@ -462,7 +452,7 @@ MyXMLVisitor::MyXMLVisitor(RichText* richText)
         return make_pair(attrValueMap, nullptr);
     });
     
-    MyXMLVisitor::setTagDescription("br", false, [](const ValueMap& /*tagAttrValueMap*/)  {
+    MyXMLVisitor::setTagDescription("br", false, [](const ValueMap& tagAttrValueMap)  {
         RichElementNewLine* richElement = RichElementNewLine::create(0, Color3B::WHITE, 255);
         return make_pair(ValueMap(), richElement);
     });
@@ -522,7 +512,7 @@ MyXMLVisitor::~MyXMLVisitor()
 
 Color3B MyXMLVisitor::getColor() const
 {
-    for (auto i = _fontElements.rbegin(), iRend = _fontElements.rend(); i != iRend; ++i)
+    for (auto i = _fontElements.rbegin(); i != _fontElements.rend(); ++i)
     {
         if (i->hasColor)
             return i->color;
@@ -532,7 +522,7 @@ Color3B MyXMLVisitor::getColor() const
 
 float MyXMLVisitor::getFontSize() const
 {
-    for (auto i = _fontElements.rbegin(), iRend = _fontElements.rend(); i != iRend; ++i)
+    for (auto i = _fontElements.rbegin(); i != _fontElements.rend(); ++i)
     {
         if (i->fontSize != -1)
             return i->fontSize;
@@ -542,7 +532,7 @@ float MyXMLVisitor::getFontSize() const
 
 std::string MyXMLVisitor::getFace() const
 {
-    for (auto i = _fontElements.rbegin(), iRend = _fontElements.rend(); i != iRend; ++i)
+    for (auto i = _fontElements.rbegin(); i != _fontElements.rend(); ++i)
     {
         if (i->face.size() != 0)
             return i->face;
@@ -552,7 +542,7 @@ std::string MyXMLVisitor::getFace() const
 
 std::string MyXMLVisitor::getURL() const
 {
-    for (auto i = _fontElements.rbegin(), iRend = _fontElements.rend(); i != iRend; ++i)
+    for (auto i = _fontElements.rbegin(); i != _fontElements.rend(); ++i)
     {
         if (i->url.size() != 0)
             return i->url;
@@ -562,7 +552,7 @@ std::string MyXMLVisitor::getURL() const
 
 bool MyXMLVisitor::getBold() const
 {
-    for (auto i = _fontElements.rbegin(), iRend = _fontElements.rend(); i != iRend; ++i)
+    for (auto i = _fontElements.rbegin(); i != _fontElements.rend(); ++i)
     {
         if (i->bold)
             return true;
@@ -572,7 +562,7 @@ bool MyXMLVisitor::getBold() const
 
 bool MyXMLVisitor::getItalics() const
 {
-    for (auto i = _fontElements.rbegin(), iRend = _fontElements.rend(); i != iRend; ++i)
+    for (auto i = _fontElements.rbegin(); i != _fontElements.rend(); ++i)
     {
         if (i->italics)
             return true;
@@ -582,7 +572,7 @@ bool MyXMLVisitor::getItalics() const
 
 bool MyXMLVisitor::getUnderline() const
 {
-    for (auto i = _fontElements.rbegin(), iRend = _fontElements.rend(); i != iRend; ++i)
+    for (auto i = _fontElements.rbegin(); i != _fontElements.rend(); ++i)
     {
         if (i->line == StyleLine::UNDERLINE)
             return true;
@@ -592,7 +582,7 @@ bool MyXMLVisitor::getUnderline() const
 
 bool MyXMLVisitor::getStrikethrough() const
 {
-    for (auto i = _fontElements.rbegin(), iRend = _fontElements.rend(); i != iRend; ++i)
+    for (auto i = _fontElements.rbegin(); i != _fontElements.rend(); ++i)
     {
         if (i->line == StyleLine::STRIKETHROUGH)
             return true;
@@ -602,7 +592,7 @@ bool MyXMLVisitor::getStrikethrough() const
 
 std::tuple<bool, Color3B, int> MyXMLVisitor::getOutline() const
 {
-    for (auto i = _fontElements.rbegin(), iRend = _fontElements.rend(); i != iRend; ++i)
+    for (auto i = _fontElements.rbegin(); i != _fontElements.rend(); ++i)
     {
         if (i->effect == StyleEffect::OUTLINE)
             return std::make_tuple(true, i->outlineColor, i->outlineSize);
@@ -612,7 +602,7 @@ std::tuple<bool, Color3B, int> MyXMLVisitor::getOutline() const
 
 std::tuple<bool, Color3B, cocos2d::Size, int> MyXMLVisitor::getShadow() const
 {
-    for (auto i = _fontElements.rbegin(), iRend = _fontElements.rend(); i != iRend; ++i)
+    for (auto i = _fontElements.rbegin(); i != _fontElements.rend(); ++i)
     {
         if (i->effect == StyleEffect::SHADOW)
             return std::make_tuple(true, i->shadowColor, i->shadowOffset, i->shadowBlurRadius);
@@ -622,7 +612,7 @@ std::tuple<bool, Color3B, cocos2d::Size, int> MyXMLVisitor::getShadow() const
 
 std::tuple<bool, Color3B> MyXMLVisitor::getGlow() const
 {
-    for (auto i = _fontElements.rbegin(), iRend = _fontElements.rend(); i != iRend; ++i)
+    for (auto i = _fontElements.rbegin(); i != _fontElements.rend(); ++i)
     {
         if (i->effect == StyleEffect::GLOW)
             return std::make_tuple(true, i->glowColor);
@@ -630,13 +620,14 @@ std::tuple<bool, Color3B> MyXMLVisitor::getGlow() const
     return std::make_tuple(false, Color3B::WHITE);
 }
 
-void MyXMLVisitor::startElement(void* /*ctx*/, const char *elementName, const char **atts)
+bool MyXMLVisitor::VisitEnter( const tinyxml2::XMLElement& element, const tinyxml2::XMLAttribute* firstAttribute )
 {
+    auto elementName = element.Value();
     auto it = _tagTables.find(elementName);
     if (it != _tagTables.end()) {
         auto tagBehavior = it->second;
         if (tagBehavior.handleVisitEnter != nullptr) {
-            ValueMap&& tagAttrValueMap = tagAttrMapWithXMLElement(atts);
+            ValueMap&& tagAttrValueMap = tagAttrMapWithXMLElement(element);
             auto result = tagBehavior.handleVisitEnter(tagAttrValueMap);
             ValueMap& attrValueMap = result.first;
             RichElement* richElement = result.second;
@@ -752,10 +743,12 @@ void MyXMLVisitor::startElement(void* /*ctx*/, const char *elementName, const ch
             }
         }
     }
+    return true;
 }
 
-void MyXMLVisitor::endElement(void* /*ctx*/, const char *elementName)
+bool MyXMLVisitor::VisitExit( const tinyxml2::XMLElement& element )
 {
+    auto elementName = element.Value();
     auto it = _tagTables.find(elementName);
     if (it != _tagTables.end()) {
         auto tagBehavior = it->second;
@@ -763,11 +756,11 @@ void MyXMLVisitor::endElement(void* /*ctx*/, const char *elementName)
             popBackFontElement();
         }
     }
+    return true;
 }
 
-void MyXMLVisitor::textHandler(void* /*ctx*/, const char *str, size_t len)
+bool MyXMLVisitor::Visit(const tinyxml2::XMLText& text)
 {
-    std::string text(str, len);
     auto color = getColor();
     auto face = getFace();
     auto fontSize = getFontSize();
@@ -797,12 +790,13 @@ void MyXMLVisitor::textHandler(void* /*ctx*/, const char *str, size_t len)
         flags |= RichElementText::SHADOW_FLAG;
     if (std::get<0>(glow))
         flags |= RichElementText::GLOW_FLAG;
-
-    auto element = RichElementText::create(0, color, 255, text, face, fontSize, flags, url,
-        std::get<1>(outline), std::get<2>(outline),
-        std::get<1>(shadow), std::get<2>(shadow), std::get<3>(shadow),
-        std::get<1>(glow));
+    
+    auto element = RichElementText::create(0, color, 255, text.Value(), face, fontSize, flags, url,
+                                           std::get<1>(outline), std::get<2>(outline),
+                                           std::get<1>(shadow), std::get<2>(shadow), std::get<3>(shadow),
+                                           std::get<1>(glow));
     _richText->pushBackElement(element);
+    return true;
 }
 
 void MyXMLVisitor::pushBackFontElement(const MyXMLVisitor::Attributes& attribs)
@@ -830,12 +824,12 @@ void MyXMLVisitor::removeTagDescription(const std::string& tag)
     MyXMLVisitor::_tagTables.erase(tag);
 }
 
-ValueMap MyXMLVisitor::tagAttrMapWithXMLElement(const char ** attrs)
+ValueMap MyXMLVisitor::tagAttrMapWithXMLElement(const tinyxml2::XMLElement& element)
 {
     ValueMap tagAttrValueMap;
-    for (const char** attr = attrs; *attr != nullptr; attr = (attrs += 2)) {
-        if (attr[0] && attr[1]) {
-            tagAttrValueMap[attr[0]] = attr[1];
+    for (const tinyxml2::XMLAttribute* attr = element.FirstAttribute(); attr != nullptr; attr = attr->Next()) {
+        if (attr->Name() && attr->Value()) {
+            tagAttrValueMap[std::string(attr->Name())] = std::string(attr->Value());
         }
     }
     return tagAttrValueMap;
@@ -843,7 +837,6 @@ ValueMap MyXMLVisitor::tagAttrMapWithXMLElement(const char ** attrs)
 
 const std::string RichText::KEY_VERTICAL_SPACE("KEY_VERTICAL_SPACE");
 const std::string RichText::KEY_WRAP_MODE("KEY_WRAP_MODE");
-const std::string RichText::KEY_HORIZONTAL_ALIGNMENT("KEY_HORIZONTAL_ALIGNMENT");
 const std::string RichText::KEY_FONT_COLOR_STRING("KEY_FONT_COLOR_STRING");
 const std::string RichText::KEY_FONT_SIZE("KEY_FONT_SIZE");
 const std::string RichText::KEY_FONT_SMALL("KEY_FONT_SMALL");
@@ -887,7 +880,6 @@ RichText::RichText()
 {
     _defaults[KEY_VERTICAL_SPACE] = 0.0f;
     _defaults[KEY_WRAP_MODE] = static_cast<int>(WrapMode::WRAP_PER_WORD);
-	_defaults[KEY_HORIZONTAL_ALIGNMENT] = static_cast<int>(HorizontalAlignment::LEFT);
     _defaults[KEY_FONT_COLOR_STRING] = "#ffffff";
     _defaults[KEY_FONT_SIZE] = 12.0f;
     _defaults[KEY_FONT_FACE] = "Verdana";
@@ -950,6 +942,8 @@ bool RichText::initWithXML(const std::string& origxml, const ValueMap& defaults,
     {
         setDefaults(defaults);
         setOpenUrlHandler(handleOpenUrl);
+        
+        tinyxml2::XMLDocument document;
 
         // solves to issues:
         //  - creates defaults values
@@ -958,10 +952,14 @@ bool RichText::initWithXML(const std::string& origxml, const ValueMap& defaults,
         xml += origxml;
         xml += "</font>";
 
-        MyXMLVisitor visitor(this);
-        SAXParser parser;
-        parser.setDelegator(&visitor);
-        return parser.parseIntrusive(&xml.front(), xml.length());
+        auto error = document.Parse(xml.c_str(), xml.length());
+        if (error == tinyxml2::XML_SUCCESS)
+        {
+            MyXMLVisitor visitor(this);
+            document.Accept(&visitor);
+            return true;
+        }
+        CCLOG("cocos2d: UI::RichText: Error parsing xml: %s, %s", document.GetErrorStr1(), document.GetErrorStr2());
     }
     return false;
 }
@@ -1006,20 +1004,6 @@ void RichText::setWrapMode(RichText::WrapMode wrapMode)
         _defaults[KEY_WRAP_MODE] = static_cast<int>(wrapMode);
         _formatTextDirty = true;
     }
-}
-
-RichText::HorizontalAlignment RichText::getHorizontalAlignment() const
-{
-	return static_cast<RichText::HorizontalAlignment>(_defaults.at(KEY_HORIZONTAL_ALIGNMENT).asInt());
-}
-
-void RichText::setHorizontalAlignment(cocos2d::ui::RichText::HorizontalAlignment a)
-{
-	if (static_cast<RichText::HorizontalAlignment>(_defaults.at(KEY_HORIZONTAL_ALIGNMENT).asInt()) != a)
-	{
-		_defaults[KEY_HORIZONTAL_ALIGNMENT] = static_cast<int>(a);
-		_formatTextDirty = true;
-	}
 }
 
 void RichText::setFontColor(const std::string& color)
@@ -1225,9 +1209,6 @@ void RichText::setDefaults(const ValueMap& defaults)
     if (defaults.find(KEY_WRAP_MODE) != defaults.end()) {
         _defaults[KEY_WRAP_MODE] = defaults.at(KEY_WRAP_MODE).asInt();
     }
-	if (defaults.find(KEY_HORIZONTAL_ALIGNMENT) != defaults.end()) {
-		_defaults[KEY_HORIZONTAL_ALIGNMENT] = defaults.at(KEY_HORIZONTAL_ALIGNMENT).asInt();
-	}
     if (defaults.find(KEY_FONT_COLOR_STRING) != defaults.end()) {
         _defaults[KEY_FONT_COLOR_STRING] = defaults.at(KEY_FONT_COLOR_STRING).asString();
     }
@@ -1356,11 +1337,10 @@ void RichText::formatText()
     {
         this->removeAllProtectedChildren();
         _elementRenders.clear();
-        _lineHeights.clear();
         if (_ignoreSize)
         {
             addNewLine();
-            for (ssize_t i=0, size = _richElements.size(); i<size; ++i)
+            for (ssize_t i=0; i<_richElements.size(); i++)
             {
                 RichElement* element = _richElements.at(i);
                 Node* elementRenderer = nullptr;
@@ -1406,11 +1386,7 @@ void RichText::formatText()
                     case RichElement::Type::IMAGE:
                     {
                         RichElementImage* elmtImage = static_cast<RichElementImage*>(element);
-                        if (elmtImage->_textureType == Widget::TextureResType::LOCAL)
-                            elementRenderer = Sprite::create(elmtImage->_filePath);
-                        else
-                            elementRenderer = Sprite::createWithSpriteFrameName(elmtImage->_filePath);
-                        
+                        elementRenderer = Sprite::create(elmtImage->_filePath);
                         if (elementRenderer && (elmtImage->_height != -1 || elmtImage->_width != -1))
                         {
                             auto currentSize = elementRenderer->getContentSize();
@@ -1452,7 +1428,7 @@ void RichText::formatText()
         else
         {
             addNewLine();
-            for (ssize_t i=0, size = _richElements.size(); i<size; ++i)
+            for (ssize_t i=0; i<_richElements.size(); i++)
             {
                 RichElement* element = static_cast<RichElement*>(_richElements.at(i));
                 switch (element->_type)
@@ -1489,260 +1465,233 @@ void RichText::formatText()
                 }
             }
         }
-        formatRenderers();
+        formarRenderers();
         _formatTextDirty = false;
     }
 }
 
-namespace {
-    inline bool isUTF8CharWrappable(const StringUtils::StringUTF8::CharUTF8& ch)
+static int getPrevWord(const std::string& text, int idx)
+{
+    // start from idx-1
+    for (int i=idx-1; i>=0; --i)
     {
-        return (!ch.isASCII() || !std::isalnum(ch._char[0], std::locale()));
+		if (!std::isalnum(text[i], std::locale()))
+            return i;
+    }
+    return -1;
+}
+
+static bool isWrappable(const std::string& text)
+{
+    for (size_t i = 0; i < text.length(); ++i)
+    {
+        if (!std::isalnum(text[i], std::locale()))
+            return true;
+    }
+    return false;
+}
+
+int RichText::findSplitPositionForWord(cocos2d::Label* label, const std::string& text)
+{
+    auto originalLeftSpaceWidth = _leftSpaceWidth + label->getContentSize().width;
+
+    bool startingNewLine = (_customSize.width == originalLeftSpaceWidth);
+    if (!isWrappable(text))
+    {
+        if (startingNewLine)
+            return (int) text.length();
+        return 0;
     }
 
-    int getPrevWordPos(const StringUtils::StringUTF8& text, int idx)
+    for(int idx = (int)text.size()-1; idx >=0; )
     {
-        if (idx <= 0)
-            return -1;
-
-        // start from idx-1
-        const StringUtils::StringUTF8::CharUTF8Store& str = text.getString();
-        auto it = std::find_if(str.rbegin() + (str.size() - idx + 1), str.rend(), isUTF8CharWrappable);
-        if (it == str.rend())
-            return -1;
-        return static_cast<int>(it.base() - str.begin());
-    }
-
-    int getNextWordPos(const StringUtils::StringUTF8& text, int idx)
-    {
-        const StringUtils::StringUTF8::CharUTF8Store& str = text.getString();
-        if (idx + 1 >= static_cast<int>(str.size()))
-            return static_cast<int>(str.size());
-
-        auto it = std::find_if(str.begin() + idx + 1, str.end(), isUTF8CharWrappable);
-        return static_cast<int>(it - str.begin());
-    }
-
-    bool isWrappable(const StringUtils::StringUTF8& text)
-    {
-        const StringUtils::StringUTF8::CharUTF8Store& str = text.getString();
-        return std::any_of(str.begin(), str.end(), isUTF8CharWrappable);
-    }
-
-    int findSplitPositionForWord(Label* label, const StringUtils::StringUTF8& text, int estimatedIdx, float originalLeftSpaceWidth, float newLineWidth)
-    {
-        bool startingNewLine = (newLineWidth == originalLeftSpaceWidth);
-        if (!isWrappable(text))
-            return (startingNewLine ? static_cast<int>(text.length()) : 0);
-
-        // The adjustment of the new line position
-        int idx = getNextWordPos(text, estimatedIdx);
-        std::string leftStr = text.getAsCharSequence(0, idx);
-        label->setString(leftStr);
-        float textRendererWidth = label->getContentSize().width;
-        if (originalLeftSpaceWidth < textRendererWidth)  // Have protruding
+        int newidx = getPrevWord(text, idx);
+        if (newidx >=0)
         {
-            while (1)
-            {
-                // try to erase a word
-                int newidx = getPrevWordPos(text, idx);
-                if (newidx >= 0)
-                {
-                    leftStr = text.getAsCharSequence(0, newidx);
-                    label->setString(leftStr);
-                    textRendererWidth = label->getContentSize().width;
-                    if (textRendererWidth <= originalLeftSpaceWidth)  // is fitted
-                        return newidx;
-                    idx = newidx;
-                    continue;
-                }
-                // newidx < 0 means no prev word
-                return (startingNewLine ? idx : 0);
+            idx = newidx;
+            auto leftStr = Helper::getSubStringOfUTF8String(text, 0, idx);
+            label->setString(leftStr);
+            if (label->getContentSize().width <= originalLeftSpaceWidth)
+                return idx;
+        }
+        else
+        {
+            if (startingNewLine)
+                return idx;
+            return 0;
+        }
+    }
+
+    // no spaces... return the original label + size
+    label->setString(text);
+    return (int)text.size();
+}
+
+
+int RichText::findSplitPositionForChar(cocos2d::Label* label, const std::string& text)
+{
+    float textRendererWidth = label->getContentSize().width;
+
+    float overstepPercent = (-_leftSpaceWidth) / textRendererWidth;
+    std::string curText = text;
+    size_t stringLength = StringUtils::getCharacterCountInUTF8String(text);
+
+    // rough estimate
+    int leftLength = stringLength * (1.0f - overstepPercent);
+
+    // The adjustment of the new line position
+    auto originalLeftSpaceWidth = _leftSpaceWidth + textRendererWidth;
+    auto leftStr = Helper::getSubStringOfUTF8String(curText, 0, leftLength);
+    label->setString(leftStr);
+    auto leftWidth = label->getContentSize().width;
+    if (originalLeftSpaceWidth < leftWidth) {
+        // Have protruding
+        for (;;) {
+            leftLength--;
+            leftStr = Helper::getSubStringOfUTF8String(curText, 0, leftLength);
+            label->setString(leftStr);
+            leftWidth = label->getContentSize().width;
+            if (leftWidth <= originalLeftSpaceWidth) {
+                break;
+            }
+            else if (leftLength <= 0) {
+                break;
             }
         }
-        else if (textRendererWidth < originalLeftSpaceWidth)  // A wide margin
-        {
-            while (1)
-            {
-                // try to append a word
-                int newidx = getNextWordPos(text, idx);
-                leftStr = text.getAsCharSequence(0, newidx);
-                label->setString(leftStr);
-                textRendererWidth = label->getContentSize().width;
-                if (textRendererWidth < originalLeftSpaceWidth)
-                {
-                    // the whole string is tested
-                    if (newidx == static_cast<int>(text.length()))
-                        return newidx;
-                    idx = newidx;
-                    continue;
-                }
-                // protruded ? undo add, or quite fit
-                return (textRendererWidth > originalLeftSpaceWidth ? idx : newidx);
+    }
+    else if (leftWidth < originalLeftSpaceWidth) {
+        // A wide margin
+        for (;;) {
+            leftLength++;
+            leftStr = Helper::getSubStringOfUTF8String(curText, 0, leftLength);
+            label->setString(leftStr);
+            leftWidth = label->getContentSize().width;
+            if (originalLeftSpaceWidth < leftWidth) {
+                leftLength--;
+                break;
+            }
+            else if (static_cast<int>(stringLength) <= leftLength) {
+                break;
             }
         }
-
-        return idx;
     }
 
-    int findSplitPositionForChar(Label* label, const StringUtils::StringUTF8& text, int estimatedIdx, float originalLeftSpaceWidth, float newLineWidth)
-    {
-        bool startingNewLine = (newLineWidth == originalLeftSpaceWidth);
-
-        int stringLength = static_cast<int>(text.length());
-        int leftLength = estimatedIdx;
-
-        // The adjustment of the new line position
-        std::string leftStr = text.getAsCharSequence(0, leftLength);
-        label->setString(leftStr);
-        float textRendererWidth = label->getContentSize().width;
-        if (originalLeftSpaceWidth < textRendererWidth)  // Have protruding
-        {
-            while (leftLength-- > 0)
-            {
-                // try to erase a char
-                auto& ch = text.getString().at(leftLength);
-                leftStr.erase(leftStr.end() - ch._char.length(), leftStr.end());
-                label->setString(leftStr);
-                textRendererWidth = label->getContentSize().width;
-                if (textRendererWidth <= originalLeftSpaceWidth)  // is fitted
-                    break;
-            }
-        }
-        else if (textRendererWidth < originalLeftSpaceWidth)  // A wide margin
-        {
-            while (leftLength < stringLength)
-            {
-                // try to append a char
-                auto& ch = text.getString().at(leftLength);
-                ++leftLength;
-                leftStr.append(ch._char);
-                label->setString(leftStr);
-                textRendererWidth = label->getContentSize().width;
-                if (originalLeftSpaceWidth < textRendererWidth)  // protruded, undo add
-                {
-                    --leftLength;
-                    break;
-                }
-                else if (originalLeftSpaceWidth == textRendererWidth)  // quite fit
-                {
-                    break;
-                }
-            }
-        }
-
-        if (leftLength <= 0)
-            return (startingNewLine) ? 1 : 0;
-        return leftLength;
-    }
+    if (leftLength < 0)
+        leftLength = (int)text.size()-1;
+    return leftLength;
 }
 
 void RichText::handleTextRenderer(const std::string& text, const std::string& fontName, float fontSize, const Color3B &color,
                                   GLubyte opacity, uint32_t flags, const std::string& url,
                                   const Color3B& outlineColor, int outlineSize ,
-                                  const Color3B& shadowColor, const Size& shadowOffset, int shadowBlurRadius,
+                                  const Color3B& shadowColor, const cocos2d::Size& shadowOffset, int shadowBlurRadius,
                                   const Color3B& glowColor)
 {
-    bool fileExist = FileUtils::getInstance()->isFileExist(fontName);
-    RichText::WrapMode wrapMode = static_cast<RichText::WrapMode>(_defaults.at(KEY_WRAP_MODE).asInt());
-
-    // split text by \n
-    std::stringstream ss(text);
-    std::string currentText;
-    size_t realLines = 0;
-    while (std::getline(ss, currentText, '\n'))
+    auto fileExist = FileUtils::getInstance()->isFileExist(fontName);
+    Label* textRenderer = nullptr;
+    if (fileExist)
     {
-        if (realLines > 0)
+        textRenderer = Label::createWithTTF(text, fontName, fontSize);
+    } 
+    else
+    {
+        textRenderer = Label::createWithSystemFont(text, fontName, fontSize);
+    }
+    if (flags & RichElementText::ITALICS_FLAG)
+        textRenderer->enableItalics();
+    if (flags & RichElementText::BOLD_FLAG)
+        textRenderer->enableBold();
+    if (flags & RichElementText::UNDERLINE_FLAG)
+        textRenderer->enableUnderline();
+    if (flags & RichElementText::STRIKETHROUGH_FLAG)
+        textRenderer->enableStrikethrough();
+    if (flags & RichElementText::URL_FLAG)
+        textRenderer->addComponent(ListenerComponent::create(textRenderer,
+                                                             url,
+                                                             std::bind(&RichText::openUrl, this, std::placeholders::_1)));
+    if (flags & RichElementText::OUTLINE_FLAG) {
+        textRenderer->enableOutline(Color4B(outlineColor), outlineSize);
+    }
+    if (flags & RichElementText::SHADOW_FLAG) {
+        textRenderer->enableShadow(Color4B(shadowColor), shadowOffset, shadowBlurRadius);
+    }
+    if (flags & RichElementText::GLOW_FLAG) {
+        textRenderer->enableGlow(Color4B(glowColor));
+    }
+
+    float textRendererWidth = textRenderer->getContentSize().width;
+    _leftSpaceWidth -= textRendererWidth;
+    if (_leftSpaceWidth < 0.0f)
+    {
+        int leftLength = 0;
+        if (static_cast<RichText::WrapMode>(_defaults.at(KEY_WRAP_MODE).asInt()) == WRAP_PER_WORD)
+            leftLength = findSplitPositionForWord(textRenderer, text);
+        else
+            leftLength = findSplitPositionForChar(textRenderer, text);
+
+        //The minimum cut length is 1, otherwise will cause the infinite loop.
+//        if (0 == leftLength) leftLength = 1;
+        std::string leftWords = Helper::getSubStringOfUTF8String(text, 0, leftLength);
+        int rightStart = leftLength;
+        if (std::isspace(text[rightStart], std::locale()))
+            rightStart++;
+        std::string cutWords = Helper::getSubStringOfUTF8String(text, rightStart, text.length() - leftLength);
+        if (leftLength > 0)
         {
-            addNewLine();
-            _lineHeights.back() = fontSize;
-        }
-        ++realLines;
-
-        size_t splitParts = 0;
-        StringUtils::StringUTF8 utf8Text(currentText);
-        while (!currentText.empty())
-        {
-            if (splitParts > 0)
+            Label* leftRenderer = nullptr;
+            if (fileExist)
             {
-                addNewLine();
-                _lineHeights.back() = fontSize;
+                leftRenderer = Label::createWithTTF(Helper::getSubStringOfUTF8String(leftWords, 0, leftLength), fontName, fontSize);
             }
-            ++splitParts;
-
-            Label* textRenderer = fileExist ? Label::createWithTTF(currentText, fontName, fontSize)
-                : Label::createWithSystemFont(currentText, fontName, fontSize);
-
-            if (flags & RichElementText::ITALICS_FLAG)
-                textRenderer->enableItalics();
-            if (flags & RichElementText::BOLD_FLAG)
-                textRenderer->enableBold();
-            if (flags & RichElementText::UNDERLINE_FLAG)
-                textRenderer->enableUnderline();
-            if (flags & RichElementText::STRIKETHROUGH_FLAG)
-                textRenderer->enableStrikethrough();
-            if (flags & RichElementText::URL_FLAG)
-                textRenderer->addComponent(ListenerComponent::create(textRenderer,
-                                                                     url,
-                                                                     std::bind(&RichText::openUrl, this, std::placeholders::_1)));
-            if (flags & RichElementText::OUTLINE_FLAG)
-                textRenderer->enableOutline(Color4B(outlineColor), outlineSize);
-            if (flags & RichElementText::SHADOW_FLAG)
-                textRenderer->enableShadow(Color4B(shadowColor), shadowOffset, shadowBlurRadius);
-            if (flags & RichElementText::GLOW_FLAG)
-                textRenderer->enableGlow(Color4B(glowColor));
-
-            textRenderer->setColor(color);
-            textRenderer->setOpacity(opacity);
-
-            // textRendererWidth will get 0.0f, when we've got glError: 0x0501 in Label::getContentSize
-            // It happens when currentText is very very long so that can't generate a texture
-            float textRendererWidth = textRenderer->getContentSize().width;
-
-            // no splitting
-            if (textRendererWidth > 0.0f && _leftSpaceWidth >= textRendererWidth)
-            {
-                _leftSpaceWidth -= textRendererWidth;
-                pushToContainer(textRenderer);
-                break;
-            }
-
-            // rough estimate
-            // when textRendererWidth == 0.0f, use fontSize as the rough estimate of width for each char,
-            //  (_leftSpaceWidth / fontSize) means how many chars can be aligned in leftSpaceWidth.
-            int estimatedIdx = 0;
-            if (textRendererWidth > 0.0f)
-                estimatedIdx = static_cast<int>(_leftSpaceWidth / textRendererWidth * utf8Text.length());
             else
-                estimatedIdx = static_cast<int>(_leftSpaceWidth / fontSize);
-
-            int leftLength = 0;
-            if (wrapMode == WRAP_PER_WORD)
-                leftLength = findSplitPositionForWord(textRenderer, utf8Text, estimatedIdx, _leftSpaceWidth, _customSize.width);
-            else
-                leftLength = findSplitPositionForChar(textRenderer, utf8Text, estimatedIdx, _leftSpaceWidth, _customSize.width);
-
-            // split string
-            if (leftLength > 0)
             {
-                textRenderer->setString(utf8Text.getAsCharSequence(0, leftLength));
-                pushToContainer(textRenderer);
+                leftRenderer = Label::createWithSystemFont(Helper::getSubStringOfUTF8String(leftWords, 0, leftLength), fontName, fontSize);
             }
+            if (leftRenderer)
+            {
+                leftRenderer->setColor(color);
+                leftRenderer->setOpacity(opacity);
+                pushToContainer(leftRenderer);
 
-            // skip spaces
-            StringUtils::StringUTF8::CharUTF8Store& str = utf8Text.getString();
-            int rightStart = leftLength;
-            while (rightStart < (int)str.size() && str[rightStart].isASCII() && std::isspace(str[rightStart]._char[0], std::locale()))
-                ++rightStart;
-
-            // erase the chars which are processed
-            str.erase(str.begin(), str.begin() + rightStart);
-            currentText = utf8Text.getAsCharSequence();
+                if (flags & RichElementText::ITALICS_FLAG)
+                    leftRenderer->enableItalics();
+                if (flags & RichElementText::BOLD_FLAG)
+                    leftRenderer->enableBold();
+                if (flags & RichElementText::UNDERLINE_FLAG)
+                    leftRenderer->enableUnderline();
+                if (flags & RichElementText::STRIKETHROUGH_FLAG)
+                    leftRenderer->enableStrikethrough();
+                if (flags & RichElementText::URL_FLAG)
+                    leftRenderer->addComponent(ListenerComponent::create(leftRenderer,
+                                                                         url,
+                                                                         std::bind(&RichText::openUrl, this, std::placeholders::_1)));
+                if (flags & RichElementText::OUTLINE_FLAG) {
+                    leftRenderer->enableOutline(Color4B(outlineColor), outlineSize);
+                }
+                if (flags & RichElementText::SHADOW_FLAG) {
+                    leftRenderer->enableShadow(Color4B(shadowColor), shadowOffset, shadowBlurRadius);
+                }
+                if (flags & RichElementText::GLOW_FLAG) {
+                    leftRenderer->enableGlow(Color4B(glowColor));
+                }
+            }
         }
+
+        addNewLine();
+        handleTextRenderer(cutWords, fontName, fontSize, color, opacity, flags, url,
+                           outlineColor, outlineSize,
+                           shadowColor, shadowOffset, shadowBlurRadius,
+                           glowColor);
+    }
+    else
+    {
+        textRenderer->setColor(color);
+        textRenderer->setOpacity(opacity);
+        pushToContainer(textRenderer);
     }
 }
-
-void RichText::handleImageRenderer(const std::string& filePath, const Color3B &/*color*/, GLubyte /*opacity*/, int width, int height, const std::string& url)
+    
+void RichText::handleImageRenderer(const std::string& filePath, const Color3B &color, GLubyte opacity, int width, int height, const std::string& url)
 {
     Sprite* imageRenderer = Sprite::create(filePath);
     if (imageRenderer)
@@ -1754,7 +1703,7 @@ void RichText::handleImageRenderer(const std::string& filePath, const Color3B &/
             imageRenderer->setScaleY(height / currentSize.height);
         imageRenderer->setContentSize(Size(currentSize.width * imageRenderer->getScaleX(),
                                              currentSize.height * imageRenderer->getScaleY()));
-        imageRenderer->setScale(1.f, 1.f);
+
         handleCustomRenderer(imageRenderer);
         imageRenderer->addComponent(ListenerComponent::create(imageRenderer,
                                                               url,
@@ -1781,90 +1730,80 @@ void RichText::handleCustomRenderer(cocos2d::Node *renderer)
 void RichText::addNewLine()
 {
     _leftSpaceWidth = _customSize.width;
-    _elementRenders.emplace_back();
-    _lineHeights.emplace_back();
+    _elementRenders.push_back(new Vector<Node*>());
 }
     
-void RichText::formatRenderers()
+void RichText::formarRenderers()
 {
-    float verticalSpace = _defaults[KEY_VERTICAL_SPACE].asFloat();
-    float fontSize = _defaults[KEY_FONT_SIZE].asFloat();
-
     if (_ignoreSize)
     {
         float newContentSizeWidth = 0.0f;
         float nextPosY = 0.0f;
-        std::vector<std::pair<Vector<Node*>*, float> > rowWidthPairs;
-        rowWidthPairs.reserve(_elementRenders.size());
         for (auto& element: _elementRenders)
         {
+            Vector<Node*>* row = element;
             float nextPosX = 0.0f;
             float maxY = 0.0f;
-            for (auto& iter : element)
+            for (ssize_t j=0; j<row->size(); j++)
             {
-                iter->setAnchorPoint(Vec2::ZERO);
-                iter->setPosition(nextPosX, nextPosY);
-                this->addProtectedChild(iter, 1);
-                Size iSize = iter->getContentSize();
+                Node* l = row->at(j);
+                l->setAnchorPoint(Vec2::ZERO);
+                l->setPosition(nextPosX, nextPosY);
+                this->addProtectedChild(l, 1);
+                Size iSize = l->getContentSize();
                 newContentSizeWidth += iSize.width;
                 nextPosX += iSize.width;
-                maxY = std::max(maxY, iSize.height);
+                maxY = MAX(maxY, iSize.height);
             }
             nextPosY -= maxY;
-            rowWidthPairs.emplace_back(&element, nextPosX);
         }
         this->setContentSize(Size(newContentSizeWidth, -nextPosY));
-        for ( auto& row : rowWidthPairs )
-            doHorizontalAlignment(*row.first, row.second);
     }
     else
     {
-        // calculate real height
         float newContentSizeHeight = 0.0f;
-        std::vector<float> maxHeights(_elementRenders.size());
+        float *maxHeights = new (std::nothrow) float[_elementRenders.size()];
         
-        for (size_t i=0, size = _elementRenders.size(); i<size; i++)
+        for (size_t i=0; i<_elementRenders.size(); i++)
         {
-            Vector<Node*>& row = _elementRenders[i];
+            Vector<Node*>* row = (_elementRenders[i]);
             float maxHeight = 0.0f;
-            for (auto& iter : row)
+            for (ssize_t j=0; j<row->size(); j++)
             {
-                maxHeight = std::max(iter->getContentSize().height, maxHeight);
-            }
-
-            // gap for empty line, if _lineHeights[i] == 0, use current RichText's fontSize
-            if (row.empty())
-            {
-                maxHeight = (_lineHeights[i] != 0.0f ? _lineHeights[i] : fontSize);
+                Node* l = row->at(j);
+                maxHeight = MAX(l->getContentSize().height, maxHeight);
             }
             maxHeights[i] = maxHeight;
-
-            // vertical space except for first line
-            newContentSizeHeight += (i != 0 ? maxHeight + verticalSpace : maxHeight);
+            newContentSizeHeight += maxHeights[i];
         }
-        _customSize.height = newContentSizeHeight;
-
-        // align renders
+        
         float nextPosY = _customSize.height;
-        for (size_t i=0, size = _elementRenders.size(); i<size; i++)
+        for (size_t i=0; i<_elementRenders.size(); i++)
         {
-            Vector<Node*>& row = _elementRenders[i];
+            Vector<Node*>* row = (_elementRenders[i]);
             float nextPosX = 0.0f;
-            nextPosY -= (i != 0 ? maxHeights[i] + verticalSpace : maxHeights[i]);
-            for (auto& iter : row)
-            {
-                iter->setAnchorPoint(Vec2::ZERO);
-                iter->setPosition(nextPosX, nextPosY);
-                this->addProtectedChild(iter, 1);
-                nextPosX += iter->getContentSize().width;
-            }
+            nextPosY -= (maxHeights[i] + _defaults.at(KEY_VERTICAL_SPACE).asFloat());
             
-            doHorizontalAlignment(row, nextPosX);
+            for (ssize_t j=0; j<row->size(); j++)
+            {
+                Node* l = row->at(j);
+                l->setAnchorPoint(Vec2::ZERO);
+                l->setPosition(nextPosX, nextPosY);
+                this->addProtectedChild(l, 1);
+                nextPosX += l->getContentSize().width;
+            }
         }
+        delete [] maxHeights;
     }
     
+    size_t length = _elementRenders.size();
+    for (size_t i = 0; i<length; i++)
+	{
+        Vector<Node*>* l = _elementRenders[i];
+        l->clear();
+        delete l;
+	}    
     _elementRenders.clear();
-    _lineHeights.clear();
     
     if (_ignoreSize)
     {
@@ -1877,73 +1816,19 @@ void RichText::formatRenderers()
     }
     updateContentSizeWithTextureSize(_contentSize);
 }
-
-namespace {
-    float getPaddingAmount(const RichText::HorizontalAlignment alignment, const float leftOver) {
-        switch ( alignment ) {
-            case RichText::HorizontalAlignment::CENTER:
-                return leftOver / 2.f;
-            case RichText::HorizontalAlignment::RIGHT:
-                return leftOver;
-            default:
-                CCASSERT(false, "invalid horizontal alignment!");
-                return 0.f;
-        }
-    }
-}
-
-void RichText::doHorizontalAlignment(const Vector<cocos2d::Node*> &row, float rowWidth) {
-    const auto alignment = static_cast<HorizontalAlignment>(_defaults.at(KEY_HORIZONTAL_ALIGNMENT).asInt());
-    if ( alignment != HorizontalAlignment::LEFT ) {
-        const auto diff = stripTrailingWhitespace(row);
-        const auto leftOver = getContentSize().width - (rowWidth + diff);
-        const float leftPadding = getPaddingAmount(alignment, leftOver);
-        const Vec2 offset(leftPadding, 0.f);
-        for ( auto& node : row ) {
-            node->setPosition(node->getPosition() + offset);
-        }
-    }
-}
-
-namespace {
-    bool isWhitespace(char c) {
-        return std::isspace(c, std::locale());
-    }
-    std::string rtrim(std::string s) {
-        s.erase(std::find_if_not(s.rbegin(),
-                                 s.rend(),
-                                 isWhitespace).base(),
-                s.end());
-        return s;
-    }
-}
-
-float RichText::stripTrailingWhitespace(const Vector<cocos2d::Node*>& row) {
-    if ( !row.empty() ) {
-        if ( auto label = dynamic_cast<Label*>(row.back()) ) {
-            const auto width = label->getContentSize().width;
-            const auto trimmedString = rtrim(label->getString());
-            if ( label->getString() != trimmedString ) {
-                label->setString(trimmedString);
-                return label->getContentSize().width - width;
-            }
-        }
-    }
-    return 0.0f;
-}
-
+    
 void RichText::adaptRenderers()
 {
     this->formatText();
 }
-
+    
 void RichText::pushToContainer(cocos2d::Node *renderer)
 {
     if (_elementRenders.size() <= 0)
     {
         return;
     }
-    _elementRenders[_elementRenders.size()-1].pushBack(renderer);
+    _elementRenders[_elementRenders.size()-1]->pushBack(renderer);
 }
     
 void RichText::setVerticalSpace(float space)
@@ -1959,7 +1844,7 @@ void RichText::ignoreContentAdaptWithSize(bool ignore)
         Widget::ignoreContentAdaptWithSize(ignore);
     }
 }
-
+    
 std::string RichText::getDescription() const
 {
     return "RichText";

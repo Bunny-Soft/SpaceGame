@@ -80,22 +80,21 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
  * The view content is basically an EAGL surface you render your OpenGL scene into.
  * Note that setting the view non-opaque will only work if the EAGL surface has an alpha channel.
  */
-@interface CCEAGLView : UIView <UIKeyInput, UITextInput, UITextInputTraits>
+@interface CCEAGLView : UIView <UIKeyInput, UITextInput>
 {
-    id<CCESRenderer>        renderer_;
-    EAGLContext             *context_; // weak ref
+    id                        <CCESRenderer> renderer_;    
+    EAGLContext                *context_; // weak ref
 
     NSString                *pixelformat_;
-    GLuint                  depthFormat_;
+    GLuint                    depthFormat_;
     BOOL                    preserveBackbuffer_;
 
-    CGSize                  size_;
-    CGRect                  safeArea_;
+    CGSize                    size_;
     BOOL                    discardFramebufferSupported_;
 
     //fsaa addition
     BOOL                    multisampling_;
-    unsigned int            requestedSamples_;
+    unsigned int               requestedSamples_;
     BOOL                    isUseUITextField;
 @private
     NSString *              markedText_;
@@ -114,8 +113,6 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
 @property(nonatomic, readonly) id<UITextInputTokenizer> tokenizer;
 @property(nonatomic, readonly, getter = isKeyboardShown) BOOL isKeyboardShown;
 @property(nonatomic, copy) NSNotification* keyboardShowNotification;
-@property(nonatomic) UITextAutocorrectionType autocorrectionType;         // default is UITextAutocorrectionTypeDefault
-
 /** creates an initializes an CCEAGLView with a frame and 0-bit depth buffer, and a RGB565 color buffer */
 + (id) viewWithFrame:(CGRect)frame;
 /** creates an initializes an CCEAGLView with a frame, a color buffer format, and 0-bit depth buffer */

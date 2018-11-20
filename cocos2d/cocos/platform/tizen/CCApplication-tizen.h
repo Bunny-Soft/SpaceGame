@@ -1,6 +1,5 @@
 /****************************************************************************
- Copyright (c) 2014-2016 Chukong Technologies Inc.
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2014 Chukong Technologies Inc.
 
  http://www.cocos2d-x.org
 
@@ -55,8 +54,7 @@ public:
      @brief Callback by Director for limit FPS.
      @param interval    The time, which expressed in second in second, between current frame and next.
      */
-    virtual void setAnimationInterval(float interval) override;
-    virtual void setAnimationInterval(float interval, SetIntervalReason reason) override;
+    void setAnimationInterval(float interval) override;
 
     /**
      @brief Run the message loop.
@@ -109,8 +107,7 @@ public:
   
   void setDeviceOrientation(int orientation);
   void setMainArgs(int argc, char **argv);
-  void setPauseFlag(bool pause){_paused = pause;}
-  bool isPaused(){return _paused;}
+
 public:
     Evas_Object * _win;
     Evas_Object * _conform;
@@ -126,7 +123,7 @@ public:
 protected:
     long _animationInterval;  //micro second
     std::string _resourceRootPath;
-    bool _paused;
+
     static Application * __instance;
 };
 

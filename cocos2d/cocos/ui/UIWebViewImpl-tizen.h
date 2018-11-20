@@ -1,6 +1,5 @@
 /****************************************************************************
- Copyright (c) 2014-2016 Chukong Technologies Inc.
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2014 Chukong Technologies Inc.
  
  http://www.cocos2d-x.org
  
@@ -62,7 +61,6 @@ namespace cocos2d {
                 void loadHTMLString(const std::string &string, const std::string &baseURL);
 
                 void loadURL(const std::string &url);
-                void loadURL(const std::string &url, bool cleanCachedData);
 
                 void loadFile(const std::string &fileName);
 
@@ -88,13 +86,7 @@ namespace cocos2d {
 
                 void setBounces(bool bounces);
 
-                void setOpacityWebView(float opacity);
-        
-                float getOpacityWebView() const;
-        
-                void setBackgroundTransparent;
-
-                Evas_Object* _ewkWin;
+                Evas_Object* _ewkWin;;
                 Evas_Object* _ewkView;
             private:
                 WebView *_webView;

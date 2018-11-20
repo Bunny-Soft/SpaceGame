@@ -1,6 +1,5 @@
 /****************************************************************************
-Copyright (c) 2013-2016 Chukong Technologies Inc.
-Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+Copyright (c) 2013-2014 Chukong Technologies Inc.
 
 http://www.cocos2d-x.org
 
@@ -32,11 +31,6 @@ THE SOFTWARE.
 
 NS_CC_BEGIN
 
-/* FIXME:
- Code could be simplified by using Sprite's setContentSize feature.
- Instead of scaling the sprite, set call setContentSize both in scale9 and non-scale9 modes
- */
-
 namespace ui {
     
 static const int BASEBAR_RENDERER_Z = (-2);
@@ -44,14 +38,12 @@ static const int PROGRESSBAR_RENDERER_Z = (-2);
 static const int SLIDBALL_RENDERER_Z = (-1);
     
 IMPLEMENT_CLASS_GUI_INFO(Slider)
-
+    
 Slider::Slider():
 _barRenderer(nullptr),
 _progressBarRenderer(nullptr),
 _barTextureSize(Size::ZERO),
-_originalBarRect(Rect::ZERO),
 _progressBarTextureSize(Size::ZERO),
-_originalProgressBarRect(Rect::ZERO),
 _slidBallNormalRenderer(nullptr),
 _slidBallPressedRenderer(nullptr),
 _slidBallDisabledRenderer(nullptr),
@@ -172,10 +164,10 @@ void Slider::loadBarTexture(const std::string& fileName, TextureResType texType)
         switch (_barTexType)
         {
         case TextureResType::LOCAL:
-            _barRenderer->setTexture(fileName);
+            _barRenderer->initWithFile(fileName);
             break;
         case TextureResType::PLIST:
-            _barRenderer->setSpriteFrame(fileName);
+            _barRenderer->initWithSpriteFrameName(fileName);
             break;
         default:
             break;
@@ -189,7 +181,7 @@ void Slider::loadBarTexture(const std::string& fileName, TextureResType texType)
 }
 void Slider::loadBarTexture(SpriteFrame* spriteframe)
 {
-    _barRenderer->setSpriteFrame(spriteframe);
+    _barRenderer->initWithSpriteFrame(spriteframe);
     this->setupBarTexture();
 }
 
@@ -200,7 +192,6 @@ void Slider::setupBarTexture()
     _progressBarRendererDirty = true;
     updateContentSizeWithTextureSize(_barRenderer->getContentSize());
     _barTextureSize = _barRenderer->getContentSize();
-    _originalBarRect = _barRenderer->getTextureRect();
 }
 
 void Slider::loadProgressBarTexture(const std::string& fileName, TextureResType texType)
@@ -216,10 +207,10 @@ void Slider::loadProgressBarTexture(const std::string& fileName, TextureResType 
         switch (_progressBarTexType)
         {
         case TextureResType::LOCAL:
-            _progressBarRenderer->setTexture(fileName);
+            _progressBarRenderer->initWithFile(fileName);
             break;
         case TextureResType::PLIST:
-            _progressBarRenderer->setSpriteFrame(fileName);
+            _progressBarRenderer->initWithSpriteFrameName(fileName);
             break;
         default:
             break;
@@ -230,7 +221,7 @@ void Slider::loadProgressBarTexture(const std::string& fileName, TextureResType 
 
 void Slider::loadProgressBarTexture(SpriteFrame* spriteframe)
 {
-    _progressBarRenderer->setSpriteFrame(spriteframe);
+    _progressBarRenderer->initWithSpriteFrame(spriteframe);
     this->setupProgressBarTexture();
 }
 
@@ -239,7 +230,6 @@ void Slider::setupProgressBarTexture()
     this->updateChildrenDisplayedRGBA();
     _progressBarRenderer->setAnchorPoint(Vec2(0.0f, 0.5f));
     _progressBarTextureSize = _progressBarRenderer->getContentSize();
-    _originalProgressBarRect = _progressBarRenderer->getTextureRect();
     _progressBarRendererDirty = true;
 }
 
@@ -297,11 +287,6 @@ void Slider::setCapInsetsBarRenderer(const Rect &capInsets)
     {
         return;
     }
-
-    // textureRect should be restored in order to calculate the scale9 correctly
-    // https://github.com/cocos2d/cocos2d-x/issues/16928
-    _barRenderer->setTextureRect(_originalBarRect, _barRenderer->isTextureRectRotated(), _barTextureSize);
-
     _barRenderer->setCapInsets(_capInsetsBarRenderer);
 }
     
@@ -318,10 +303,6 @@ void Slider::setCapInsetProgressBarRenderer(const Rect &capInsets)
     {
         return;
     }
-    // textureRect should be restored in order to calculate the scale9 correctly
-    // https://github.com/cocos2d/cocos2d-x/issues/16928
-    _progressBarRenderer->setTextureRect(_originalProgressBarRect, _progressBarRenderer->isTextureRectRotated(), _progressBarTextureSize);
-
     _progressBarRenderer->setCapInsets(_capInsetsProgressBarRenderer);
 }
     
@@ -465,13 +446,17 @@ void Slider::setPercent(int percent)
     }
     else
     {
-        Rect rect = _progressBarRenderer->getTextureRect();
-        rect.size.width = _progressBarTextureSize.width * res;
-        _progressBarRenderer->setTextureRect(rect, _progressBarRenderer->isTextureRectRotated(), rect.size);
+        Sprite* spriteRenderer = _progressBarRenderer->getSprite();
+        
+        if (nullptr != spriteRenderer) {
+            Rect rect = spriteRenderer->getTextureRect();
+            rect.size.width = _progressBarTextureSize.width * res;
+            spriteRenderer->setTextureRect(rect, spriteRenderer->isTextureRectRotated(), rect.size);
+        }
     }
 }
     
-bool Slider::hitTest(const cocos2d::Vec2 &pt, const Camera *camera, Vec3* /*p*/) const
+bool Slider::hitTest(const cocos2d::Vec2 &pt, const Camera *camera, Vec3 *p) const
 {
     Rect rect;
     rect.size = _slidBallNormalRenderer->getContentSize();
@@ -494,7 +479,7 @@ bool Slider::onTouchBegan(Touch *touch, Event *unusedEvent)
     return pass;
 }
 
-void Slider::onTouchMoved(Touch *touch, Event* /*unusedEvent*/)
+void Slider::onTouchMoved(Touch *touch, Event *unusedEvent)
 {
     _touchMovePosition = touch->getLocation();
     setPercent(getPercentWithBallPos(_touchMovePosition));
@@ -675,13 +660,13 @@ void Slider::onPressStateChangedToNormal()
     _slidBallPressedRenderer->setVisible(false);
     _slidBallDisabledRenderer->setVisible(false);
     
-    _slidBallNormalRenderer->setGLProgramState(this->getNormalGLProgramState(_slidBallNormalRenderer->getTexture()));
+    _slidBallNormalRenderer->setGLProgramState(this->getNormalGLProgramState());
     _slidBallNormalRenderer->setScale(_sliderBallNormalTextureScaleX, _sliderBallNormalTextureScaleY);
 }
 
 void Slider::onPressStateChangedToPressed()
 {
-    _slidBallNormalRenderer->setGLProgramState(this->getNormalGLProgramState(_slidBallNormalRenderer->getTexture()));
+    _slidBallNormalRenderer->setGLProgramState(this->getNormalGLProgramState());
 
     
     if (!_isSliderBallPressedTextureLoaded)
@@ -701,7 +686,7 @@ void Slider::onPressStateChangedToDisabled()
 {
     if (!_isSliderBallDisabledTexturedLoaded)
     {
-        _slidBallNormalRenderer->setGLProgramState(this->getGrayGLProgramState(_slidBallNormalRenderer->getTexture()));
+        _slidBallNormalRenderer->setGLProgramState(this->getGrayGLProgramState());
         _slidBallNormalRenderer->setVisible(true);
     }
     else
@@ -744,13 +729,16 @@ void Slider::copySpecialProperties(Widget *widget)
     {
         _prevIgnoreSize = slider->_prevIgnoreSize;
         setScale9Enabled(slider->_scale9Enabled);
-
-        // clone the inner sprite: https://github.com/cocos2d/cocos2d-x/issues/16928
-        slider->_barRenderer->copyTo(_barRenderer);
-        setupBarTexture();
-        slider->_progressBarRenderer->copyTo(_progressBarRenderer);
-        setupProgressBarTexture();
-
+        auto barSprite = slider->_barRenderer->getSprite();
+        if (nullptr != barSprite)
+        {
+            loadBarTexture(barSprite->getSpriteFrame());
+        }
+        auto progressSprite = slider->_progressBarRenderer->getSprite();
+        if (nullptr != progressSprite)
+        {
+            loadProgressBarTexture(progressSprite->getSpriteFrame());
+        }
         loadSlidBallTextureNormal(slider->_slidBallNormalRenderer->getSpriteFrame());
         loadSlidBallTexturePressed(slider->_slidBallPressedRenderer->getSpriteFrame());
         loadSlidBallTextureDisabled(slider->_slidBallDisabledRenderer->getSpriteFrame());
@@ -763,22 +751,6 @@ void Slider::copySpecialProperties(Widget *widget)
         _eventCallback = slider->_eventCallback;
         _ccEventCallback = slider->_ccEventCallback;
     }
-}
-
-Sprite* Slider::getSlidBallNormalRenderer() const {
-    return _slidBallNormalRenderer;
-}
-
-Sprite* Slider::getSlidBallPressedRenderer() const {
-    return _slidBallPressedRenderer;
-}
-
-Sprite* Slider::getSlidBallDisabledRenderer() const {
-    return _slidBallDisabledRenderer;
-}
-
-Node* Slider::getSlidBallRenderer() const {
-    return _slidBallRenderer;
 }
 
 ResourceData Slider::getBackFile()

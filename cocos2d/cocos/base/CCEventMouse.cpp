@@ -1,6 +1,5 @@
 /****************************************************************************
- Copyright (c) 2013-2016 Chukong Technologies Inc.
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2013-2014 Chukong Technologies Inc.
 
  http://www.cocos2d-x.org
 
@@ -32,7 +31,7 @@ NS_CC_BEGIN
 EventMouse::EventMouse(MouseEventType mouseEventCode)
 : Event(Type::MOUSE)
 , _mouseEventType(mouseEventCode)
-, _mouseButton(MouseButton::BUTTON_UNSET)
+, _mouseButton(-1)
 , _x(0.0f)
 , _y(0.0f)
 , _scrollX(0.0f)

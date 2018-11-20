@@ -3,7 +3,6 @@
  Copyright (c) 2012 James Chen
  Copyright (c) 2013-2015 zilongshanren
  Copyright (c) 2015 Mazyad Alabduljaleel
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
  
  http://www.cocos2d-x.org
  
@@ -94,8 +93,6 @@
     textInput.ccui_text = _textInput.ccui_text ?: @"";
     textInput.ccui_placeholder = _textInput.ccui_placeholder ?: @"";
     textInput.ccui_font = _textInput.ccui_font ?: [UIFont systemFontOfSize:self.frameRect.size.height*2/3];
-    textInput.ccui_placeholderFont = _textInput.ccui_placeholderFont ?: textInput.ccui_font;
-    textInput.ccui_placeholderTextColor = _textInput.ccui_placeholderTextColor ?: [UIColor lightGrayColor];
     
     [_textInput resignFirstResponder];
     [_textInput removeFromSuperview];
@@ -136,16 +133,6 @@
 - (void)setTextColor:(UIColor*)color
 {
     self.textInput.ccui_textColor = color;
-}
-
-- (void)setPlaceholderFont:(UIFont *)font
-{
-    self.textInput.ccui_placeholderFont = font;
-}
-
-- (void)setPlaceholderTextColor:(UIColor *)color
-{
-    self.textInput.ccui_placeholderTextColor = color;
 }
 
 - (void)setInputMode:(cocos2d::ui::EditBox::InputMode)inputMode
@@ -252,19 +239,10 @@
             self.textInput.returnKeyType = UIReturnKeyGo;
             break;
             
-        case cocos2d::ui::EditBox::KeyboardReturnType::NEXT:
-            self.textInput.returnKeyType = UIReturnKeyNext;
-            break;
-
         default:
             self.textInput.returnKeyType = UIReturnKeyDefault;
             break;
     }
-}
-
-- (void)setTextHorizontalAlignment:(cocos2d::TextHAlignment)alignment
-{
-    self.textInput.ccui_alignment = static_cast<NSTextAlignment>(alignment);
 }
 
 - (void)setText:(NSString *)text
@@ -285,21 +263,6 @@
 - (NSString *)getDefaultFontName
 {
     return self.textInput.ccui_font.fontName ?: @"";
-}
-
-- (cocos2d::ui::EditBoxDelegate::EditBoxEndAction)getEndAction
-{
-    cocos2d::ui::EditBoxDelegate::EditBoxEndAction action = cocos2d::ui::EditBoxDelegate::EditBoxEndAction::UNKNOWN;
-    if (self.returnPressed) {
-        if (self.keyboardReturnType == cocos2d::ui::EditBox::KeyboardReturnType::NEXT) {
-            action = cocos2d::ui::EditBoxDelegate::EditBoxEndAction::TAB_TO_NEXT;
-        } else if (self.keyboardReturnType == cocos2d::ui::EditBox::KeyboardReturnType::GO ||
-                   self.keyboardReturnType == cocos2d::ui::EditBox::KeyboardReturnType::SEND ||
-                   self.keyboardReturnType == cocos2d::ui::EditBox::KeyboardReturnType::SEARCH) {
-            action = cocos2d::ui::EditBoxDelegate::EditBoxEndAction::RETURN;
-        }
-    }
-    return action;
 }
 
 - (void)setPlaceHolder:(NSString *)text
@@ -342,7 +305,6 @@
 - (BOOL)textFieldShouldReturn:(UITextField *)sender
 {
     if (sender == self.textInput) {
-        self.returnPressed = YES;
         [sender resignFirstResponder];
     }
     return NO;
@@ -362,7 +324,6 @@
 {
     CCLOG("textFieldShouldBeginEditing...");
     _editState = YES;
-    _returnPressed = NO;
     
     auto view = cocos2d::Director::getInstance()->getOpenGLView();
     CCEAGLView *eaglview = (CCEAGLView *) view->getEAGLView();
@@ -375,14 +336,14 @@
     return YES;
 }
 
-- (BOOL)textViewShouldEndEditing:(UITextView *)textView
+- (BOOL)textViewShouldEndEditing:(UITextView *)textView;
 {
     CCLOG("textFieldShouldEndEditing...");
     _editState = NO;
     getEditBoxImplIOS()->refreshInactiveText();
-
+    
     const char* inputText = [textView.text UTF8String];
-    getEditBoxImplIOS()->editBoxEditingDidEnd(inputText, [self getEndAction]);
+    getEditBoxImplIOS()->editBoxEditingDidEnd(inputText);
     
     return YES;
 }
@@ -461,8 +422,8 @@
     CCLOG("textFieldShouldEndEditing...");
     _editState = NO;
     const char* inputText = [sender.text UTF8String];
-
-    getEditBoxImplIOS()->editBoxEditingDidEnd(inputText, [self getEndAction]);
+    
+    getEditBoxImplIOS()->editBoxEditingDidEnd(inputText);
     
     return YES;
 }

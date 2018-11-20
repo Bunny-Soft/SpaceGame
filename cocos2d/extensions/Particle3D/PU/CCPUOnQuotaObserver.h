@@ -1,7 +1,6 @@
 /****************************************************************************
  Copyright (C) 2013 Henry van Merode. All rights reserved.
- Copyright (c) 2015-2016 Chukong Technologies Inc.
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2015 Chukong Technologies Inc.
  
  http://www.cocos2d-x.org
  
@@ -53,7 +52,7 @@ CC_CONSTRUCTOR_ACCESS:
     PUOnQuotaObserver(void) : PUObserver(),
         _result(false)
     {
-    }
+    };
     virtual ~PUOnQuotaObserver(void) {};
 
 protected:

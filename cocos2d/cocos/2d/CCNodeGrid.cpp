@@ -1,6 +1,5 @@
 /****************************************************************************
- Copyright (c) 2013-2016 Chukong Technologies Inc.
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2013-2014 Chukong Technologies Inc.
 
  http://www.cocos2d-x.org
 
@@ -149,7 +148,7 @@ void NodeGrid::visit(Renderer *renderer, const Mat4 &parentTransform, uint32_t p
     {
         sortAllChildren();
         // draw children zOrder < 0
-        for(auto size = _children.size(); i < size; ++i)
+        for( ; i < _children.size(); i++ )
         {
             auto node = _children.at(i);
 
@@ -162,7 +161,7 @@ void NodeGrid::visit(Renderer *renderer, const Mat4 &parentTransform, uint32_t p
         if (visibleByCamera)
             this->draw(renderer, _modelViewTransform, dirty);
 
-        for(auto it=_children.cbegin()+i, itCend = _children.cend(); it != itCend; ++it) {
+        for(auto it=_children.cbegin()+i; it != _children.cend(); ++it) {
             (*it)->visit(renderer, _modelViewTransform, dirty);
         }
     }

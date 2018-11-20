@@ -1,7 +1,6 @@
 /****************************************************************************
 Copyright (c) 2010-2013 cocos2d-x.org
 Copyright (c) Microsoft Open Technologies, Inc.
-Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
 http://www.cocos2d-x.org
 
@@ -208,9 +207,9 @@ void CCPrecompiledShaders::savePrecompiledPrograms(Windows::Storage::StorageFold
         dataWriter->WriteString(L"#define PRECOMPILED_SHADERS\n\n");
 
 
-        for (auto& iter : m_programs)
+        for (auto iter = m_programs.begin(); iter != m_programs.end(); ++iter) 
         {
-            CompiledProgram* p = (CompiledProgram*)iter.second;
+            CompiledProgram* p = (CompiledProgram*)iter->second;
             Platform::String^ keyName = PlatformStringFromString(p->key);
             Platform::String^ programName = SHADER_NAME_PREFIX + keyName;
 

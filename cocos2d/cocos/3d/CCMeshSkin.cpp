@@ -1,6 +1,5 @@
 /****************************************************************************
- Copyright (c) 2014-2016 Chukong Technologies Inc.
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2014 Chukong Technologies Inc.
 
  http://www.cocos2d-x.org
 
@@ -54,10 +53,7 @@ MeshSkin* MeshSkin::create(Skeleton3D* skeleton, const std::vector<std::string>&
     CCASSERT(boneNames.size() == invBindPose.size(), "bone names' num should equals to invBindPose's num");
     for (const auto& it : boneNames) {
         auto bone = skeleton->getBoneByName(it);
-        if (bone)
-        {
-            skin->addSkinBone(bone);
-        }
+        skin->addSkinBone(bone);
     }
     skin->_invBindPoses = invBindPose;
     skin->autorelease();
@@ -90,9 +86,10 @@ Bone3D* MeshSkin::getBoneByName(const std::string& id) const
 
 int MeshSkin::getBoneIndex(Bone3D* bone) const
 {
-    for (ssize_t i = 0, size = _skinBones.size(); i < size; ++i) {
+    int i = 0;
+    for (; i < _skinBones.size(); i++) {
         if (_skinBones.at(i) == bone)
-            return static_cast<int>(i);
+            return i;
     }
 
     return -1;
@@ -150,7 +147,7 @@ Bone3D* MeshSkin::getRootBone() const
 
 const Mat4& MeshSkin::getInvBindPose(const Bone3D* bone)
 {
-    for (ssize_t i = 0, size = _skinBones.size(); i < size; ++i) {
+    for (ssize_t i = 0; i < _skinBones.size(); i++) {
         if (_skinBones.at(i) == bone)
         {
             return _invBindPoses.at(i);
