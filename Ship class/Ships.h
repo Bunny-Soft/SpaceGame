@@ -212,7 +212,7 @@
       }
 
       //////////////////////////////////////////////////////
-            /* Getter methods for cruiser class */
+            /* Getter methods for bulwark class */
       ///////////////////////////////////////////////////////
 
       float set_ship_integrity()
@@ -319,7 +319,7 @@
       }
 
       //////////////////////////////////////////////////////
-            /* Getter methods for cruiser class */
+            /* Getter methods for mining class */
       ///////////////////////////////////////////////////////
 
       float set_ship_integrity()
