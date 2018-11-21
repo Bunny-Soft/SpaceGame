@@ -65,7 +65,7 @@
       }
       ~cruiser(){}
 
-    private:
+    protected:
 
       //////////////////////////////////////////////////////
             /* Setter methods for cruiser class */
@@ -170,7 +170,7 @@
 
       }
       ~bulwark(){}
-    private:
+    protected:
 
       //////////////////////////////////////////////////////
             /* Setter methods for bulwark class */
@@ -277,7 +277,7 @@
 
       }
       ~mining(){}
-    private:
+    protected:
 
       //////////////////////////////////////////////////////
             /* Setter methods for mining class */
