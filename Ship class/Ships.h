@@ -30,13 +30,6 @@
       virtual void set_power()=0;
       virtual void set_power_drain()=0;
 
-      virtual void get_ship_integrity()=0;
-      virtual void get_shield_capacity()=0;
-      virtual void get_attack()=0;
-      virtual void get_shield_regen()=0;
-      virtual void get_system_break_chance()=0;
-      virtual void get_power()=0;
-      virtual void get_power_drain()=0;
     };
 
 
