@@ -110,37 +110,37 @@
             /* Getter methods for cruiser class */
       ///////////////////////////////////////////////////////
 
-      float set_ship_integrity()
+      float get_ship_integrity()
       {
         return ship_integrity;
       }
 
-      float set_shield_capacity()
+      float get_shield_capacity()
       {
         return shield_capacity;
       }
 
-      float set_attack()
+      float get_attack()
       {
         return attack;
       }
 
-      float set_shield_regen()
+      float get_shield_regen()
       {
         return shield_regen;
       }
 
-      float set_system_break_chance(float n)
+      float get_system_break_chance(float n)
       {
         return system_break_chance;
       }
 
-      float set_power()
+      float get_power()
       {
         return power;
       }
 
-      float set_power_drain()
+      float get_power_drain()
       {
         return power_drain;
       }
@@ -215,37 +215,37 @@
             /* Getter methods for bulwark class */
       ///////////////////////////////////////////////////////
 
-      float set_ship_integrity()
+      float get_ship_integrity()
       {
         return ship_integrity;
       }
 
-      float set_shield_capacity()
+      float get_shield_capacity()
       {
         return shield_capacity;
       }
 
-      float set_attack()
+      float get_attack()
       {
         return attack;
       }
 
-      float set_shield_regen()
+      float get_shield_regen()
       {
         return shield_regen;
       }
 
-      float set_system_break_chance(float n)
+      float get_system_break_chance(float n)
       {
         return system_break_chance;
       }
 
-      float set_power()
+      float get_power()
       {
         return power;
       }
 
-      float set_power_drain()
+      float get_power_drain()
       {
         return power_drain;
       }
@@ -322,37 +322,37 @@
             /* Getter methods for mining class */
       ///////////////////////////////////////////////////////
 
-      float set_ship_integrity()
+      float get_ship_integrity()
       {
         return ship_integrity;
       }
 
-      float set_shield_capacity()
+      float get_shield_capacity()
       {
         return shield_capacity;
       }
 
-      float set_attack()
+      float get_attack()
       {
         return attack;
       }
 
-      float set_shield_regen()
+      float get_shield_regen()
       {
         return shield_regen;
       }
 
-      float set_system_break_chance(float n)
+      float get_system_break_chance(float n)
       {
         return system_break_chance;
       }
 
-      float set_power()
+      float get_power()
       {
         return power;
       }
 
-      float set_power_drain()
+      float get_power_drain()
       {
         return power_drain;
       }
