@@ -46,13 +46,14 @@
       //for Cruiser class, attack and shield regen should be +1
       cruiser(){
 
-        ship_integrity = 0;
-        shield_capacity = 0;
-        attack = 0;
-        shield_regen = 0;
-        system_break_chance = 0;
-        power = 0;
-        power_drain = 0;
+        ship_integrity = 20;
+        shield_capacity = 25;
+        attack = 5;
+        shield_regen = 8;
+        system_break_chance = 0.05;
+        power = 10;
+        //power drain is one every turn.
+        power_drain = 1;
 
 
       }
@@ -153,13 +154,14 @@
       //for Bulwark class, ship integrity and shield capacity should be +5, and -1 for attack
       bulwark(){
 
-        ship_integrity = 0;
-        shield_capacity = 0;
-        attack = 0;
-        shield_regen = 0;
-        system_break_chance = 0;
-        power = 0;
-        power_drain = 0;
+        ship_integrity = 25;
+        shield_capacity = 30;
+        attack = 3;
+        shield_regen = 7;
+        system_break_chance = 0.05;
+        power = 10;
+        //power drain is one every turn.
+        power_drain = 1;
 
       }
       ~bulwark(){}
@@ -260,13 +262,14 @@
       //for mining ship, should have plus one mining per return (done in other class)
       mining(){
 
-        ship_integrity = 0;
-        shield_capacity = 0;
-        attack = 0;
-        shield_regen = 0;
-        system_break_chance = 0;
-        power = 0;
-        power_drain = 0;
+        ship_integrity = 25;
+        shield_capacity = 30;
+        attack = 3;
+        shield_regen = 7;
+        system_break_chance = 0.05;
+        power = 10;
+        //power drain is one every turn.
+        power_drain = 1;
 
       }
       ~mining(){}
