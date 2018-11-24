@@ -30,13 +30,6 @@
       virtual void set_power()=0;
       virtual void set_power_drain()=0;
 
-      virtual void get_ship_integrity()=0;
-      virtual void get_shield_capacity()=0;
-      virtual void get_attack()=0;
-      virtual void get_shield_regen()=0;
-      virtual void get_system_break_chance()=0;
-      virtual void get_power()=0;
-      virtual void get_power_drain()=0;
     };
 
 
@@ -53,13 +46,14 @@
       //for Cruiser class, attack and shield regen should be +1
       cruiser(){
 
-        ship_integrity = 0;
-        shield_capacity = 0;
-        attack = 0;
-        shield_regen = 0;
-        system_break_chance = 0;
-        power = 0;
-        power_drain = 0;
+        ship_integrity = 20;
+        shield_capacity = 25;
+        attack = 5;
+        shield_regen = 8;
+        system_break_chance = 0.05;
+        power = 10;
+        //power drain is one every turn.
+        power_drain = 1;
 
 
       }
@@ -110,37 +104,37 @@
             /* Getter methods for cruiser class */
       ///////////////////////////////////////////////////////
 
-      float set_ship_integrity()
+      float get_ship_integrity()
       {
         return ship_integrity;
       }
 
-      float set_shield_capacity()
+      float get_shield_capacity()
       {
         return shield_capacity;
       }
 
-      float set_attack()
+      float get_attack()
       {
         return attack;
       }
 
-      float set_shield_regen()
+      float get_shield_regen()
       {
         return shield_regen;
       }
 
-      float set_system_break_chance(float n)
+      float get_system_break_chance(float n)
       {
         return system_break_chance;
       }
 
-      float set_power()
+      float get_power()
       {
         return power;
       }
 
-      float set_power_drain()
+      float get_power_drain()
       {
         return power_drain;
       }
@@ -160,13 +154,14 @@
       //for Bulwark class, ship integrity and shield capacity should be +5, and -1 for attack
       bulwark(){
 
-        ship_integrity = 0;
-        shield_capacity = 0;
-        attack = 0;
-        shield_regen = 0;
-        system_break_chance = 0;
-        power = 0;
-        power_drain = 0;
+        ship_integrity = 25;
+        shield_capacity = 30;
+        attack = 3;
+        shield_regen = 7;
+        system_break_chance = 0.05;
+        power = 10;
+        //power drain is one every turn.
+        power_drain = 1;
 
       }
       ~bulwark(){}
@@ -215,37 +210,37 @@
             /* Getter methods for bulwark class */
       ///////////////////////////////////////////////////////
 
-      float set_ship_integrity()
+      float get_ship_integrity()
       {
         return ship_integrity;
       }
 
-      float set_shield_capacity()
+      float get_shield_capacity()
       {
         return shield_capacity;
       }
 
-      float set_attack()
+      float get_attack()
       {
         return attack;
       }
 
-      float set_shield_regen()
+      float get_shield_regen()
       {
         return shield_regen;
       }
 
-      float set_system_break_chance(float n)
+      float get_system_break_chance(float n)
       {
         return system_break_chance;
       }
 
-      float set_power()
+      float get_power()
       {
         return power;
       }
 
-      float set_power_drain()
+      float get_power_drain()
       {
         return power_drain;
       }
@@ -267,13 +262,14 @@
       //for mining ship, should have plus one mining per return (done in other class)
       mining(){
 
-        ship_integrity = 0;
-        shield_capacity = 0;
-        attack = 0;
-        shield_regen = 0;
-        system_break_chance = 0;
-        power = 0;
-        power_drain = 0;
+        ship_integrity = 25;
+        shield_capacity = 30;
+        attack = 3;
+        shield_regen = 7;
+        system_break_chance = 0.05;
+        power = 10;
+        //power drain is one every turn.
+        power_drain = 1;
 
       }
       ~mining(){}
@@ -322,37 +318,37 @@
             /* Getter methods for mining class */
       ///////////////////////////////////////////////////////
 
-      float set_ship_integrity()
+      float get_ship_integrity()
       {
         return ship_integrity;
       }
 
-      float set_shield_capacity()
+      float get_shield_capacity()
       {
         return shield_capacity;
       }
 
-      float set_attack()
+      float get_attack()
       {
         return attack;
       }
 
-      float set_shield_regen()
+      float get_shield_regen()
       {
         return shield_regen;
       }
 
-      float set_system_break_chance(float n)
+      float get_system_break_chance(float n)
       {
         return system_break_chance;
       }
 
-      float set_power()
+      float get_power()
       {
         return power;
       }
 
-      float set_power_drain()
+      float get_power_drain()
       {
         return power_drain;
       }
