@@ -1,3 +1,4 @@
+#include "Ships.h"
 #include <string>
 #include <vector>
 #include <iostream>
@@ -69,7 +70,7 @@ class game_info
 		{
 			explored_areas ++;
 		}
-};	
+};
 
 class restoration: public cruiser, public bulwark, public mining
 {
@@ -91,7 +92,7 @@ class restoration: public cruiser, public bulwark, public mining
 				ship_integrity -6;
 				power = power + power_drain;
 				return power;
-			}	
+			}
 			else if(turns >= 4)
 			{
 				life_support = false;
