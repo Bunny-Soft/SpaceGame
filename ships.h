@@ -13,10 +13,31 @@ class ships {
 		float shield_amount;
 		float attack;
 		float power_drain;
+		float mine_rate;
+		float power_level; // its over 9000!
 
     public:
-        ships() {}
-    	virtual~ships() {}
+        ships(){}
+    	~ships(){}
+
+	void deploySolar(){
+		power_level += 5;
+	}
+	void mine(){
+		ship_integrity += mine_rate;
+	}
+	void divertPowerToShields(){
+		if(power_level > 10) {
+			shield_amount *= 1.5;
+			power_level -= 10;
+		}
+	}
+	void divertPowerToWeapons(){
+		if(power_level > 10) {
+			attack *= 2;
+			power_level -= 10;
+		}
+	}
 
 	//////////////////////////////////////////////////////
     /* Setter methods for ship class */
@@ -65,6 +86,10 @@ class ships {
         return power_drain;
     }
 
+	float get_power_level() {
+		return power_level;
+	}
+
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -81,6 +106,8 @@ class cruiser: public ships {
             attack = 5;
             //power drain is one every turn.
             power_drain = 1;
+			mine_rate = 1;
+			power_level = 0;
         }
 		~cruiser() {}
 };
@@ -98,6 +125,8 @@ class bulwark: public ships {
             shield_amount = 30;
             attack = 3;
             power_drain = 1;
+			mine_rate = 1;
+			power_level = 0;
         }
 		~bulwark() {}
 };
@@ -110,13 +139,34 @@ class mining: public ships {
     public:
         //for mining ship, should have plus one mining per return (done in other class)
         mining() {
-            ship_integrity = 25;
+            ship_integrity = 30;
             shield_capacity = 30;
-            shield_amount = 30;
+            shield_amount = 10;
             attack = 3;
             power_drain = 1;
+			mine_rate = 5;
+			power_level = 0;
         }
 		~mining() {}
+};
+
+class PirateKing: public ships {
+    public:
+        PirateKing() {
+            ship_integrity = 75;
+            shield_capacity = 0;
+            shield_amount = 0;
+            attack = 10;
+            power_drain = 1;
+			mine_rate = 5;
+			power_level = 0;
+        }
+		~PirateKing() {}
+
+		// super aDvAnCeD Ai tO DeFeAt AlL
+		void runAi(ships attackingShip) {
+			attackingShip.set_ship_integrity(attackingShip.get_ship_integrity() - attack);
+		}
 };
 
 #endif

@@ -6,14 +6,10 @@ int check = 0;
 int ship_type = 0;
 int randNum;
 
-cruiser ptr1;
-bulwark ptr2;
-mining ptr3;
-
+ships ship;
+PirateKing enemy;
 ////////////////////////////////////////////////////////////////////////////////////
-
 /* GUI Window to display the Main menu */
-
 ////////////////////////////////////////////////////////////////////////////////////
 
 MainWindow::MainWindow() {
@@ -42,18 +38,14 @@ MainWindow::MainWindow() {
 MainWindow::~MainWindow() {}
 
 void MainWindow::Play() {
-
     //open shipwindow, closing main window
     check = 1;
     hide();
-
 }
 
 void MainWindow::Tutorial() {
-
     TutorialWindow window3;
     Gtk::Main::run(window3);
-
 }
 
 void MainWindow::Exit() {
@@ -61,14 +53,11 @@ void MainWindow::Exit() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
-
 /* GUI Window to allow player to select their ship. */
-
 ////////////////////////////////////////////////////////////////////////////////////
 
 //need to add labels next to each picture, detailing the ships status points.
 ShipWindow::ShipWindow() {
-
     this -> set_title("Select Ship");
     this -> set_border_width(5);
     ship1.set("select_1.png");
@@ -95,23 +84,28 @@ ShipWindow::ShipWindow() {
     grid.show_all();
 
     add(grid);
-
 }
 
 ShipWindow::~ShipWindow() {}
 
 void ShipWindow::Selected_Cruiser() {
     ship_type = 1;
+	cruiser temp;
+	ship = temp;
     hide();
 }
 
 void ShipWindow::Selected_Bulwark() {
     ship_type = 2;
+	bulwark temp;
+	ship = temp;
     hide();
 }
 
 void ShipWindow::Selected_Mining() {
     ship_type = 3;
+	mining temp;
+	ship = temp;
     hide();
 }
 
@@ -128,9 +122,7 @@ TutorialWindow::TutorialWindow() {
 TutorialWindow::~TutorialWindow() {}
 
 ////////////////////////////////////////////////////////////////////////////////////
-
 /* GUI Window to display Play Window */
-
 ////////////////////////////////////////////////////////////////////////////////////
 
 PlayWindow::PlayWindow() {
@@ -169,18 +161,34 @@ void PlayWindow::Mine() {
     Gtk::MessageDialog dialog( * this, "Mining Asteroid", false, Gtk::MESSAGE_INFO);
     dialog.set_secondary_text("....");
     dialog.run();
-    randNum = rand() % (4 - 0 + 1);
+	// 1/3 chance of combat
+    randNum = rand() % (3);
     if (randNum == 2) {
+		Gtk::MessageDialog dialog( * this, "Pirate King Attack", false, Gtk::MESSAGE_INFO);
+		dialog.set_secondary_text("While mining, a pirate king attacks your ship.");
+		dialog.run();
         hide();
     }
 }
 
 void PlayWindow::Solar() {
+	ship.deploySolar();
+
+	float temp = ship.get_power_level();
+
+    std::ostringstream sf;
+    sf << temp;
+    std::string s1(sf.str());
+
     Gtk::MessageDialog dialog( * this, "Deploying solar panels", false, Gtk::MESSAGE_INFO);
-    dialog.set_secondary_text("...");
+    dialog.set_secondary_text("The power level is now: " + s1);
     dialog.run();
-    randNum = rand() % (4 - 0 + 1);
+	// 1/4 chance of combat
+    randNum = rand() % (4);
     if (randNum == 2) {
+		Gtk::MessageDialog dialog( * this, "Pirate King Attack", false, Gtk::MESSAGE_INFO);
+	    dialog.set_secondary_text("While charging your shields on solar energy, a pirate king attacks your ship.");
+	    dialog.run();
         hide();
     }
 }
@@ -191,19 +199,15 @@ void PlayWindow::show_ship_status() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
-
 /* GUI Window to display Combat Info*/
-
 ////////////////////////////////////////////////////////////////////////////////////
 
 /*
   Need to insert the combat logic in the below window.
-
 */
 
 CombatWindow::CombatWindow() {
-
-    this -> set_title("Combat Control");
+    this -> set_title("Under Attack");
     this -> set_border_width(5);
     if (ship_type == 1) {
         image.set("background_1_moving_enemy.gif");
@@ -240,19 +244,10 @@ CombatWindow::CombatWindow() {
     float temp2;
     float temp3;
 
-    if (ship_type == 1) {
-        temp1 = ptr1.get_attack();
-        temp2 = ptr1.get_ship_integrity();
-        temp3 = ptr1.get_shield_amount();
-    } else if (ship_type == 2) {
-        temp1 = ptr2.get_attack();
-        temp2 = ptr2.get_ship_integrity();
-        temp3 = ptr2.get_shield_amount();
-    } else if (ship_type == 3) {
-        temp1 = ptr3.get_attack();
-        temp2 = ptr3.get_ship_integrity();
-        temp3 = ptr3.get_shield_amount();
-    }
+	temp1 = ship.get_shield_amount();
+    temp2 = ship.get_attack();
+    temp3 = ship.get_ship_integrity();
+
 
     std::ostringstream ss;
     ss << temp1;
@@ -288,18 +283,98 @@ CombatWindow::~CombatWindow() {}
 
 void CombatWindow::Retreat() {
     hide();
-
+	Gtk::MessageDialog dialog( * this, "You Lose", false, Gtk::MESSAGE_INFO);
+	dialog.set_secondary_text("Pirates dont allow retreats");
+	dialog.run();
 }
 void CombatWindow::Attack() {
+	enemy.set_ship_integrity(enemy.get_ship_integrity() - ship.get_attack());
 
+	enemy.runAi(ship);
+
+    float temp1;
+    float temp2;
+    float temp3;
+
+	temp1 = ship.get_shield_amount();
+    temp2 = ship.get_attack();
+    temp3 = ship.get_ship_integrity();
+
+    std::ostringstream ss;
+    ss << temp1;
+    std::string s1(ss.str());
+
+    std::ostringstream sd;
+    sd << temp2;
+    std::string s2(sd.str());
+
+    std::ostringstream sf;
+    sf << temp3;
+    std::string s3(sf.str());
+
+    //note, these will change based on the players actions.
+    label4.set_text(s1);
+    label5.set_text(s2);
+    label6.set_text(s3);
+
+	checkHealth();
 }
 
 void CombatWindow::Divert_power_to_shields() {
+	if(ship.get_power_level() < 10) {
+		Gtk::MessageDialog dialog( * this, "Not enough power", false, Gtk::MESSAGE_INFO);
+		dialog.set_secondary_text("Looks like you should have deployed those panels sooner");
+		dialog.run();
+	}
+	else {
+		ship.divertPowerToShields();
+		Gtk::MessageDialog dialog( * this, "Shields are now 1.5x Strength", false, Gtk::MESSAGE_INFO);
+		dialog.set_secondary_text("...");
+		dialog.run();
 
+		float temp1;
+
+		temp1 = ship.get_shield_amount();
+
+		std::ostringstream ss;
+		ss << temp1;
+		std::string s1(ss.str());
+
+		label4.set_text(s1);
+	}
 }
 
 void CombatWindow::Divert_power_to_weapons() {
+	if(ship.get_power_level() < 10) {
+		Gtk::MessageDialog dialog( * this, "Not enough power", false, Gtk::MESSAGE_INFO);
+		dialog.set_secondary_text("Looks like you should have deployed those panels sooner");
+		dialog.run();
+	}
+	else {
+		ship.divertPowerToWeapons();
+		Gtk::MessageDialog dialog( * this, "Weapons are now 2x Strength", false, Gtk::MESSAGE_INFO);
+		dialog.set_secondary_text("...");
+		dialog.run();
+		float temp1;
 
+		temp1 = ship.get_attack();
+
+		std::ostringstream ss;
+		ss << temp1;
+		std::string s1(ss.str());
+
+		label4.set_text(s1);
+	}
+}
+
+void CombatWindow::checkHealth(){
+	if(ship.get_ship_integrity() <= 0) {
+		Gtk::MessageDialog dialog( * this, "You Lose", false, Gtk::MESSAGE_INFO);
+		dialog.set_secondary_text("Pirates dont allow retreats");
+		dialog.run();
+	}
+	EnemyStatsWindow window6;
+	Gtk::Main::run(window6);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -313,25 +388,11 @@ StatsWindow::StatsWindow() {
     float temp4;
     float temp5;
 
-    if (ship_type == 1) {
-        temp1 = ptr1.get_attack();
-        temp2 = ptr1.get_power_drain();
-        temp3 = ptr1.get_ship_integrity();
-        temp4 = ptr1.get_shield_capacity();
-        temp5 = ptr1.get_shield_amount();
-    } else if (ship_type == 2) {
-        temp1 = ptr2.get_attack();
-        temp2 = ptr2.get_power_drain();
-        temp3 = ptr2.get_ship_integrity();
-        temp4 = ptr2.get_shield_capacity();
-        temp5 = ptr2.get_shield_amount();
-    } else if (ship_type == 3) {
-        temp1 = ptr3.get_attack();
-        temp2 = ptr3.get_power_drain();
-        temp3 = ptr3.get_ship_integrity();
-        temp4 = ptr3.get_shield_capacity();
-        temp5 = ptr3.get_shield_amount();
-    }
+    temp1 = ship.get_attack();
+    temp2 = ship.get_power_drain();
+    temp3 = ship.get_ship_integrity();
+    temp4 = ship.get_shield_capacity();
+    temp5 = ship.get_shield_amount();
 
     this -> set_title("Ship Status");
     this -> set_border_width(5);
@@ -374,7 +435,6 @@ StatsWindow::StatsWindow() {
     grid.attach(label3, 0, 4, 2, 1);
     grid.attach(label4, 0, 6, 2, 1);
     grid.attach(label7, 0, 8, 2, 1);
-
     grid.attach(label8, 2, 0, 2, 1);
     grid.attach(label9, 2, 2, 2, 1);
     grid.attach(label10, 2, 4, 2, 1);
@@ -387,3 +447,73 @@ StatsWindow::StatsWindow() {
 }
 
 StatsWindow::~StatsWindow() {}
+////////////////////////////////////////////////////////////////////////////////////
+/* GUI Window to display Enemy Ship status*/
+////////////////////////////////////////////////////////////////////////////////////
+
+EnemyStatsWindow::EnemyStatsWindow() {
+    float temp1;
+    float temp2;
+    float temp3;
+    float temp4;
+    float temp5;
+
+    temp1 = enemy.get_attack();
+    temp2 = enemy.get_power_drain();
+    temp3 = enemy.get_ship_integrity();
+    temp4 = enemy.get_shield_capacity();
+    temp5 = enemy.get_shield_amount();
+
+    this -> set_title("ENEMY SHIP STATUS");
+    this -> set_border_width(5);
+
+    label1.set_text("Ship Integrity");
+    label2.set_text("Shield Capacity");
+    label3.set_text("Attack Damage");
+    label4.set_text("Shield Amount");
+    label7.set_text("Power Drain");
+
+    std::ostringstream ss;
+    ss << temp1;
+    std::string s1(ss.str());
+
+    std::ostringstream sd;
+    sd << temp2;
+    std::string s2(sd.str());
+
+    std::ostringstream sf;
+    sf << temp3;
+    std::string s3(sf.str());
+
+    std::ostringstream sg;
+    sg << temp4;
+    std::string s4(sg.str());
+
+    std::ostringstream sh;
+    sh << temp5;
+    std::string s5(sh.str());
+
+    //put ship stats here.
+    label8.set_text(s3);
+    label9.set_text(s4);
+    label10.set_text(s1);
+    label11.set_text(s5);
+    label14.set_text(s2);
+
+    grid.attach(label1, 0, 0, 2, 1);
+    grid.attach(label2, 0, 2, 2, 1);
+    grid.attach(label3, 0, 4, 2, 1);
+    grid.attach(label4, 0, 6, 2, 1);
+    grid.attach(label7, 0, 8, 2, 1);
+    grid.attach(label8, 2, 0, 2, 1);
+    grid.attach(label9, 2, 2, 2, 1);
+    grid.attach(label10, 2, 4, 2, 1);
+    grid.attach(label11, 2, 6, 2, 1);
+    grid.attach(label14, 2, 8, 2, 1);
+
+    grid.show_all();
+
+    add(grid);
+}
+
+EnemyStatsWindow::~EnemyStatsWindow() {}

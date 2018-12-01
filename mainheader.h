@@ -77,12 +77,12 @@ class CombatWindow:public Gtk::Window
 public:
   CombatWindow();
   virtual ~CombatWindow();
-
 protected:
   void         Retreat();
   void         Attack();
   void         Divert_power_to_weapons();
   void         Divert_power_to_shields();
+  void checkHealth();
 
   Gtk::Image   image;
   Gtk::Button  button1,button2,button3,button4;
@@ -102,5 +102,16 @@ protected:
   Gtk::Label   label1,label2,label3,label4,label5,label6,label7,label8,label9,label10,label11,label12,label13,label14;
   Gtk::Grid    grid;
 };
+class EnemyStatsWindow:public Gtk::Window
+{
 
+public:
+  EnemyStatsWindow();
+  virtual ~EnemyStatsWindow();
+
+protected:
+  Gtk::Image   image;
+  Gtk::Label   label1,label2,label3,label4,label5,label6,label7,label8,label9,label10,label11,label12,label13,label14;
+  Gtk::Grid    grid;
+};
 #endif
