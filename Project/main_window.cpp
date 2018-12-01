@@ -219,8 +219,8 @@ TutorialWindow::~TutorialWindow()
     Gtk::MessageDialog dialog(*this, "Mining Asteroid",false,Gtk::MESSAGE_INFO);
     dialog.set_secondary_text("....");
     dialog.run();
-    randNum = rand()%(5-0+1);
-    if(randNum == 3)
+    randNum = rand()%(4-0+1);
+    if(randNum == 2)
     {
       hide();
     }
@@ -233,8 +233,8 @@ TutorialWindow::~TutorialWindow()
     Gtk::MessageDialog dialog(*this, "Deploying solar panels",false,Gtk::MESSAGE_INFO);
     dialog.set_secondary_text("...");
     dialog.run();
-    randNum = rand()%(5-0+1);
-    if(randNum == 3)
+    randNum = rand()%(4-0+1);
+    if(randNum == 2)
     {
       hide();
     }
