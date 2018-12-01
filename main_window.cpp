@@ -375,7 +375,7 @@ void CombatWindow::checkHealth(){
 		dialog.set_secondary_text("Your ship was destroyed by pirates");
 		dialog.run();
 	}
-	if (enemy.ship_integrity() <= ) {
+	if (enemy.get_ship_integrity() <= 0) {
 		Gtk::MessageDialog dialog( * this, "You WIn", false, Gtk::MESSAGE_INFO);
 		dialog.set_secondary_text("You defeated the pirate king!");
 		dialog.run();
