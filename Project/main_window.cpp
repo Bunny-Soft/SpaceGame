@@ -4,10 +4,13 @@
 
 int check = 0;
 int ship_type =0;
+int randNum;
 
   cruiser ptr1;
   bulwark ptr2;
   mining  ptr3;
+
+
 
 
 
@@ -189,17 +192,13 @@ TutorialWindow::~TutorialWindow()
     grid.attach(button2,0,4,2,2);
 
 
-    button3.add_label("Combat");
-    button3.signal_pressed().connect(sigc::mem_fun(*this,&PlayWindow::Combat_Status));
-    grid.attach(button3,2,4,2,2);
-
     button4.add_label("Mine asteroid");
     button4.signal_pressed().connect(sigc::mem_fun(*this,&PlayWindow::Mine));
-    grid.attach(button4,0,6,2,2);
+    grid.attach(button4,2,4,2,2);
 
     button5.add_label("Ship Status");
     button5.signal_pressed().connect(sigc::mem_fun(*this,&PlayWindow::show_ship_status));
-    grid.attach(button5,2,6,2,2);
+    grid.attach(button5,0,6,4,2);
 
 
 
@@ -213,12 +212,6 @@ TutorialWindow::~TutorialWindow()
   {}
 
 
-  void PlayWindow::Combat_Status()
-  {
-
-    hide();
-
-  }
 
 
   void PlayWindow::Mine()
@@ -226,6 +219,11 @@ TutorialWindow::~TutorialWindow()
     Gtk::MessageDialog dialog(*this, "Mining Asteroid",false,Gtk::MESSAGE_INFO);
     dialog.set_secondary_text("....");
     dialog.run();
+    randNum = rand()%(5-0+1);
+    if(randNum == 3)
+    {
+      hide();
+    }
 
 
   }
@@ -235,6 +233,11 @@ TutorialWindow::~TutorialWindow()
     Gtk::MessageDialog dialog(*this, "Deploying solar panels",false,Gtk::MESSAGE_INFO);
     dialog.set_secondary_text("...");
     dialog.run();
+    randNum = rand()%(5-0+1);
+    if(randNum == 3)
+    {
+      hide();
+    }
 
   }
 
@@ -273,8 +276,21 @@ TutorialWindow::~TutorialWindow()
 
       this->set_title("Combat Control");
     this->set_border_width(5);
-    image.set("background_1_moving.gif");
+    if(ship_type==1)
+    {
+    image.set("background_1_moving_enemy.gif");
     grid.attach(image,0,0,4,4);
+    }
+    else if(ship_type==2)
+    {
+    image.set("background_1_moving_enemy_2.gif");
+    grid.attach(image,0,0,4,4);
+    }
+    else if(ship_type==3)
+    {
+    image.set("background_1_moving_enemy_3.gif");
+    grid.attach(image,0,0,4,4);
+    }
 
     button1.add_label("Attack");
     button1.signal_pressed().connect(sigc::mem_fun(*this,&CombatWindow::Attack));
@@ -295,13 +311,50 @@ TutorialWindow::~TutorialWindow()
 
     label1.set_text("Shield Strength");
     label2.set_text("Weapon Damage");
-    label3.set_text("Power");
+    label3.set_text("Ship Integrity");
 
+
+
+    float temp1;
+    float temp2;
+    float temp3;
+
+
+    if(ship_type==1)
+    {
+        temp1=ptr1.get_attack();
+        temp2=ptr1.get_ship_integrity();
+        temp3=ptr1.get_shield_amount();
+    }
+    else if(ship_type==2)
+    {
+      temp1=ptr2.get_attack();
+      temp2=ptr2.get_ship_integrity();
+      temp3=ptr2.get_shield_amount();
+    }
+    else if(ship_type==3)
+    {
+      temp1=ptr3.get_attack();
+      temp2=ptr3.get_ship_integrity();
+      temp3=ptr3.get_shield_amount();
+    }
+
+    std::ostringstream ss;
+    ss<<temp1;
+    std::string s1(ss.str());
+
+    std::ostringstream sd;
+    sd<<temp2;
+    std::string s2(sd.str());
+
+    std::ostringstream sf;
+    sf<<temp3;
+    std::string s3(sf.str());
 
     //note, these will change based on the players actions.
-    label4.set_text("20");
-    label5.set_text("5");
-    label6.set_text("10");
+    label4.set_text(s1);
+    label5.set_text(s2);
+    label6.set_text(s3);
 
     grid.attach(label1,0,8,1,1);
     grid.attach(label2,1,8,2,1);
@@ -328,6 +381,7 @@ TutorialWindow::~TutorialWindow()
 
   void CombatWindow::Retreat()
   {
+    hide();
 
   }
   void CombatWindow::Attack()

@@ -8,6 +8,7 @@
 
 extern int check;
 extern int ship_type;
+extern int randNum;
 
 using namespace std;
 
