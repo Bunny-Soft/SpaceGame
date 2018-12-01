@@ -3,6 +3,7 @@
 #include <gtkmm.h>
 
 
+
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
                           /* Base Ship Class */
@@ -20,11 +21,13 @@
       float attack;
       float power_drain;
 
+      /*
       virtual void set_ship_integrity()=0;
       virtual void set_shield_capacity()=0;
       virtual void set_shield_amount() = 0;
       virtual void set_attack()=0;
       virtual void set_power_drain()=0;
+      */
 
     };
 
@@ -35,7 +38,7 @@
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    class cruiser:virtual public ships{
+    class cruiser:public ships{
 
     public:
 
@@ -53,7 +56,8 @@
       }
       ~cruiser(){}
 
-    protected:
+
+
 
       //////////////////////////////////////////////////////
             /* Setter methods for cruiser class */
@@ -91,7 +95,10 @@
       {
         return ship_integrity;
       }
-
+      float get_shield_amount()
+      {
+      return shield_amount;
+      }
       float get_shield_capacity()
       {
         return shield_capacity;
@@ -101,15 +108,14 @@
       {
         return attack;
       }
-float get_shield_amount()
-	{
-		return shield_amount;
-	}
 
       float get_power_drain()
       {
         return power_drain;
       }
+
+
+
 
     };
 
@@ -120,7 +126,7 @@ float get_shield_amount()
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    class bulwark:virtual public ships{
+    class bulwark:public ships{
     public:
 
       //for Bulwark class, ship integrity and shield capacity should be +5, and -1 for attack
@@ -134,7 +140,7 @@ float get_shield_amount()
 
       }
       ~bulwark(){}
-    protected:
+
 
       //////////////////////////////////////////////////////
             /* Setter methods for bulwark class */
@@ -202,7 +208,7 @@ float get_shield_amount()
 
 
 
-    class mining:virtual public ships{
+    class mining:public ships{
     public:
 
       //for mining ship, should have plus one mining per return (done in other class)
@@ -216,7 +222,7 @@ float get_shield_amount()
 
       }
       ~mining(){}
-    protected:
+
 
       //////////////////////////////////////////////////////
             /* Setter methods for mining class */
