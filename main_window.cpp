@@ -173,8 +173,8 @@ void PlayWindow::Mine() {
 
 
 
-	// 1/2 chance of combat
-    randNum = rand() % (2);
+	// 1/3 chance of combat
+    randNum = rand() % (3);
     if (randNum == 1) {
 		Gtk::MessageDialog dialog( * this, "Pirate King Attack", false, Gtk::MESSAGE_INFO);
 		dialog.set_secondary_text("While mining, a pirate king attacks your ship.");
@@ -207,7 +207,7 @@ void PlayWindow::Solar() {
 
 
 	// 1/4 chance of combat
-    randNum = rand() % (3);
+    randNum = rand() % (4);
     if (randNum == 1) {
 		Gtk::MessageDialog dialog( * this, "Pirate King Attack", false, Gtk::MESSAGE_INFO);
 	    dialog.set_secondary_text("While charging your shields on solar energy, a pirate king attacks your ship.");
