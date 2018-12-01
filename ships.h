@@ -7,7 +7,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 class ships {
-	protected:
+	public:
 		float ship_integrity;
 		float shield_capacity;
 		float shield_amount;
@@ -16,7 +16,7 @@ class ships {
 		float mine_rate;
 		float power_level; // its over 9000!
 
-    public:
+
         ships(){}
     	~ships(){}
 

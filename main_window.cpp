@@ -161,9 +161,21 @@ void PlayWindow::Mine() {
     Gtk::MessageDialog dialog( * this, "Mining Asteroid", false, Gtk::MESSAGE_INFO);
     dialog.set_secondary_text("....");
     dialog.run();
-	// 1/3 chance of combat
-    randNum = rand() % (3);
-    if (randNum == 2) {
+
+    if (ship_type == 1) {
+        ship1.set("background_1_moving_astroid.gif");
+    } else if (ship_type == 2) {
+        ship1.set("background_2_moving_astroid.gif");
+    } else if (ship_type == 3) {
+        ship1.set("background_3_astroid.gif");
+    }
+
+
+
+
+	// 1/2 chance of combat
+    randNum = rand() % (2);
+    if (randNum == 1) {
 		Gtk::MessageDialog dialog( * this, "Pirate King Attack", false, Gtk::MESSAGE_INFO);
 		dialog.set_secondary_text("While mining, a pirate king attacks your ship.");
 		dialog.run();
@@ -183,9 +195,20 @@ void PlayWindow::Solar() {
     Gtk::MessageDialog dialog( * this, "Deploying solar panels", false, Gtk::MESSAGE_INFO);
     dialog.set_secondary_text("The power level is now: " + s1);
     dialog.run();
+
+    if (ship_type == 1) {
+        ship1.set("background_1_moving_solar_panel.gif");
+    } else if (ship_type == 2) {
+        ship1.set("background_1_moving_2_solar_panel.gif");
+    } else if (ship_type == 3) {
+        ship1.set("background_1_moving_3_solar_panel.gif");
+    }
+
+
+
 	// 1/4 chance of combat
-    randNum = rand() % (4);
-    if (randNum == 2) {
+    randNum = rand() % (3);
+    if (randNum == 1) {
 		Gtk::MessageDialog dialog( * this, "Pirate King Attack", false, Gtk::MESSAGE_INFO);
 	    dialog.set_secondary_text("While charging your shields on solar energy, a pirate king attacks your ship.");
 	    dialog.run();
@@ -282,10 +305,11 @@ CombatWindow::CombatWindow() {
 CombatWindow::~CombatWindow() {}
 
 void CombatWindow::Retreat() {
-    hide();
+
 	Gtk::MessageDialog dialog( * this, "You Lose", false, Gtk::MESSAGE_INFO);
 	dialog.set_secondary_text("Pirates dont allow retreats");
 	dialog.run();
+    hide();
 }
 void CombatWindow::Attack() {
 	enemy.set_ship_integrity(enemy.get_ship_integrity() - ship.get_attack());
@@ -375,10 +399,11 @@ void CombatWindow::checkHealth(){
 		dialog.set_secondary_text("Your ship was destroyed by pirates");
 		dialog.run();
 	}
-	if (enemy.ship_integrity() <= ) {
+	if (enemy.get_ship_integrity() <= 0) {
 		Gtk::MessageDialog dialog( * this, "You WIn", false, Gtk::MESSAGE_INFO);
 		dialog.set_secondary_text("You defeated the pirate king!");
 		dialog.run();
+    hide();
 	}
 	EnemyStatsWindow window6;
 	Gtk::Main::run(window6);
