@@ -16,18 +16,14 @@
     protected:
       float ship_integrity;
       float shield_capacity;
+     float shield_amount;
       float attack;
-      float shield_regen;
-      float system_break_chance;
-      float power;
       float power_drain;
 
       virtual void set_ship_integrity()=0;
       virtual void set_shield_capacity()=0;
+      virtual void set_shield_amount() = 0;
       virtual void set_attack()=0;
-      virtual void set_shield_regen()=0;
-      virtual void set_system_break_chance()=0;
-      virtual void set_power()=0;
       virtual void set_power_drain()=0;
 
     };
@@ -39,7 +35,7 @@
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    class cruiser:public ships{
+    class cruiser:virtual public ships{
 
     public:
 
@@ -48,10 +44,8 @@
 
         ship_integrity = 20;
         shield_capacity = 25;
+	shield_amount = 25;
         attack = 5;
-        shield_regen = 8;
-        system_break_chance = 0.05;
-        power = 10;
         //power drain is one every turn.
         power_drain = 1;
 
@@ -79,21 +73,10 @@
       {
         attack = n;
       }
-
-      void set_shield_regen(float n)
-      {
-        shield_regen = n;
-      }
-
-      void set_system_break_chance(float n)
-      {
-        system_break_chance = n;
-      }
-
-      void set_power(float n)
-      {
-        power = n;
-      }
+     void set_shield_amount(float n)
+	{
+		shield_amount = n;
+	}
 
       void set_power_drain(float n)
       {
@@ -118,21 +101,10 @@
       {
         return attack;
       }
-
-      float get_shield_regen()
-      {
-        return shield_regen;
-      }
-
-      float get_system_break_chance(float n)
-      {
-        return system_break_chance;
-      }
-
-      float get_power()
-      {
-        return power;
-      }
+float get_shield_amount()
+	{
+		return shield_amount;
+	}
 
       float get_power_drain()
       {
@@ -148,7 +120,7 @@
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    class bulwark:public ships{
+    class bulwark:virtual public ships{
     public:
 
       //for Bulwark class, ship integrity and shield capacity should be +5, and -1 for attack
@@ -156,11 +128,8 @@
 
         ship_integrity = 25;
         shield_capacity = 30;
+        shield_amount = 30;
         attack = 3;
-        shield_regen = 7;
-        system_break_chance = 0.05;
-        power = 10;
-        //power drain is one every turn.
         power_drain = 1;
 
       }
@@ -185,21 +154,10 @@
       {
         attack = n;
       }
-
-      void set_shield_regen(float n)
-      {
-        shield_regen = n;
-      }
-
-      void set_system_break_chance(float n)
-      {
-        system_break_chance = n;
-      }
-
-      void set_power(float n)
-      {
-        power = n;
-      }
+void set_shield_amount(float n)
+	{
+		shield_amount = n;
+	}
 
       void set_power_drain(float n)
       {
@@ -214,7 +172,10 @@
       {
         return ship_integrity;
       }
-
+float get_shield_amount()
+	{
+		return shield_amount;
+	}
       float get_shield_capacity()
       {
         return shield_capacity;
@@ -223,21 +184,6 @@
       float get_attack()
       {
         return attack;
-      }
-
-      float get_shield_regen()
-      {
-        return shield_regen;
-      }
-
-      float get_system_break_chance(float n)
-      {
-        return system_break_chance;
-      }
-
-      float get_power()
-      {
-        return power;
       }
 
       float get_power_drain()
@@ -256,7 +202,7 @@
 
 
 
-    class mining:public ships{
+    class mining:virtual public ships{
     public:
 
       //for mining ship, should have plus one mining per return (done in other class)
@@ -264,11 +210,8 @@
 
         ship_integrity = 25;
         shield_capacity = 30;
+	shield_amount = 30;
         attack = 3;
-        shield_regen = 7;
-        system_break_chance = 0.05;
-        power = 10;
-        //power drain is one every turn.
         power_drain = 1;
 
       }
@@ -294,20 +237,10 @@
         attack = n;
       }
 
-      void set_shield_regen(float n)
-      {
-        shield_regen = n;
-      }
-
-      void set_system_break_chance(float n)
-      {
-        system_break_chance = n;
-      }
-
-      void set_power(float n)
-      {
-        power = n;
-      }
+    void set_shield_amount(float n)
+	{
+		shield_amount = n;
+	}
 
       void set_power_drain(float n)
       {
@@ -332,21 +265,10 @@
       {
         return attack;
       }
-
-      float get_shield_regen()
-      {
-        return shield_regen;
-      }
-
-      float get_system_break_chance(float n)
-      {
-        return system_break_chance;
-      }
-
-      float get_power()
-      {
-        return power;
-      }
+    float get_shield_amount()
+	{
+		return shield_amount;
+	}
 
       float get_power_drain()
       {
