@@ -363,6 +363,8 @@ void CombatWindow::Divert_power_to_weapons() {
 		ss << temp1;
 		std::string s1(ss.str());
 
+		printf("%s\n", s1);
+
 		label4.set_text(s1);
 	}
 }
@@ -370,7 +372,12 @@ void CombatWindow::Divert_power_to_weapons() {
 void CombatWindow::checkHealth(){
 	if(ship.get_ship_integrity() <= 0) {
 		Gtk::MessageDialog dialog( * this, "You Lose", false, Gtk::MESSAGE_INFO);
-		dialog.set_secondary_text("Pirates dont allow retreats");
+		dialog.set_secondary_text("Your ship was destroyed by pirates");
+		dialog.run();
+	}
+	if (enemy.ship_integrity() <= ) {
+		Gtk::MessageDialog dialog( * this, "You WIn", false, Gtk::MESSAGE_INFO);
+		dialog.set_secondary_text("You defeated the pirate king!");
 		dialog.run();
 	}
 	EnemyStatsWindow window6;
