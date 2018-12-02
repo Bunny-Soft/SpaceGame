@@ -8,35 +8,68 @@
 
 class ships {
 	public:
-		float ship_integrity;
-		float shield_capacity;
-		float shield_amount;
-		float attack;
-		float power_drain;
-		float mine_rate;
-		float power_level; // its over 9000!
+		float ship_integrity; //this is the ships integrity
+		float shield_capacity; //this is the maximum shield capacity
+		float shield_amount; //this is the current shield amount
+		float attack; //this is the basic attack
+		float power_drain; //I dont actually know what this does
+		float power_level; // this is the power level
 
 
         ships(){}
     	~ships(){}
 
+	//solar panel will increase the power level slowly and build damage, but will drain the shield each turn
+
 	void deploySolar(){
 		power_level += 5;
+		attack +=1;
+		shield_amount -= 10;
 	}
-	void mine(){
-		ship_integrity += mine_rate;
+
+	//this will increase the shield capacity, we can choose if this is just to be an out of combat thing or not
+
+	void inc_shield()
+	{
+		shield_amount+=5;
 	}
+
+	//mining asteroids will increase power quickly, increase the damage, but it does increasing integrity damage each turn
+
+	void mineAsteroid(int turn)
+	{
+		power_level += 10;
+		attack +=2;
+		ship_integrity -= (turn*3);
+	}
+
+	//void mine(){
+	//	ship_integrity += mine_rate;
+	//}
+
+	//divert power to shields will drain power, but increase the shield amount
+
 	void divertPowerToShields(){
 		if(power_level > 10) {
 			shield_amount *= 1.5;
 			power_level -= 10;
 		}
 	}
+
+	//divert power to shields will drain power, but increase damage
+
 	void divertPowerToWeapons(){
 		if(power_level > 10) {
 			attack *= 2;
 			power_level -= 10;
 		}
+	}
+
+	//this is what we use to increase the power when in combat because solar panels and mining asteroids is unavailable.
+
+	void combat_power_gen()
+	{
+		power_level+=3;
 	}
 
 	//////////////////////////////////////////////////////
@@ -106,7 +139,6 @@ class cruiser: public ships {
             attack = 5;
             //power drain is one every turn.
             power_drain = 1;
-			mine_rate = 1;
 			power_level = 0;
         }
 		~cruiser() {}
@@ -125,7 +157,7 @@ class bulwark: public ships {
             shield_amount = 30;
             attack = 3;
             power_drain = 1;
-			mine_rate = 1;
+			//mine_rate = 1;
 			power_level = 0;
         }
 		~bulwark() {}
@@ -144,8 +176,7 @@ class mining: public ships {
             shield_amount = 10;
             attack = 3;
             power_drain = 1;
-			mine_rate = 5;
-			power_level = 0;
+		power_level = 0;
         }
 		~mining() {}
 };
@@ -158,8 +189,7 @@ class PirateKing: public ships {
             shield_amount = 0;
             attack = 10;
             power_drain = 1;
-			mine_rate = 5;
-			power_level = 0;
+	    power_level = 0;
         }
 		~PirateKing() {}
 

@@ -117,6 +117,14 @@ void ShipWindow::Selected_Mining() {
 
 TutorialWindow::TutorialWindow() {
     this -> set_title("Tutorial");
+    image.set("tutorial.jpg");
+    grid.attach(image,0 , 0, 1, 1);
+
+
+
+        grid.show_all();
+
+        add(grid);
 }
 
 TutorialWindow::~TutorialWindow() {}
@@ -304,6 +312,8 @@ CombatWindow::CombatWindow() {
 
 CombatWindow::~CombatWindow() {}
 
+
+//either we need to end the program if the user chooses this, or their ship is severly damaged.
 void CombatWindow::Retreat() {
 
 	Gtk::MessageDialog dialog( * this, "You Lose", false, Gtk::MESSAGE_INFO);

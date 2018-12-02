@@ -51,7 +51,7 @@ class TutorialWindow:public Gtk::Window
     virtual ~TutorialWindow();
 
     protected:
-      Gtk::Label label1,label2,label3;
+      Gtk::Image image;
       Gtk::Grid grid;
 };
 
