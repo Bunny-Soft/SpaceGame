@@ -355,7 +355,7 @@ void CombatWindow::Attack() {
 }
 
 void CombatWindow::Divert_power_to_shields() {
-	if(ship.get_power_level() < 10) {
+	if(ship.get_power_level() <= 10) {
 		Gtk::MessageDialog dialog( * this, "Not enough power", false, Gtk::MESSAGE_INFO);
 		dialog.set_secondary_text("Looks like you should have deployed those panels sooner");
 		dialog.run();
@@ -379,7 +379,7 @@ void CombatWindow::Divert_power_to_shields() {
 }
 
 void CombatWindow::Divert_power_to_weapons() {
-	if(ship.get_power_level() < 10) {
+	if(ship.get_power_level() <= 10) {
 		Gtk::MessageDialog dialog( * this, "Not enough power", false, Gtk::MESSAGE_INFO);
 		dialog.set_secondary_text("Looks like you should have deployed those panels sooner");
 		dialog.run();
@@ -397,9 +397,7 @@ void CombatWindow::Divert_power_to_weapons() {
 		ss << temp1;
 		std::string s1(ss.str());
 
-		printf("%s\n", s1);
-
-		label4.set_text(s1);
+		label5.set_text(s1);
 	}
 }
 

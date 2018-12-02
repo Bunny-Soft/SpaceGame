@@ -24,7 +24,8 @@ class ships {
 	void deploySolar(){
 		power_level += 5;
 		attack +=1;
-		shield_amount -= 10;
+		if(shield_amount <= 10)
+			shield_amount -= 10;
 	}
 
 	//this will increase the shield capacity, we can choose if this is just to be an out of combat thing or not
@@ -187,7 +188,7 @@ class PirateKing: public ships {
             ship_integrity = 75;
             shield_capacity = 0;
             shield_amount = 0;
-            attack = 10;
+            attack = 15;
             power_drain = 1;
 	    power_level = 0;
         }
